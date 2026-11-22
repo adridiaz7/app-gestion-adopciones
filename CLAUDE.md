@@ -20,7 +20,6 @@ Entorno: Windows, con PowerShell y Git Bash.
 - **TypeScript estricto: prohibido `any`** (ESLint lo trata como error).
 - **Módulos ESM:** los imports relativos llevan la extensión `.js` (`import { crearApp } from './app.js'`).
 - **Acceso a datos con `pg`:** SQL a mano y siempre parametrizado (`$1`, `$2`…). Nunca concatenar valores ni usar ORM.
-- Tests con **Vitest**; las peticiones HTTP, con **supertest**.
 - El tiempo se inyecta (interfaz Reloj). Nunca `new Date()` dentro del dominio.
 - Errores de negocio con clases propias, no con strings.
 - **Idioma del código: español** (lenguaje del dominio, DDD). En español: identificadores (variables, funciones, clases, tipos), comentarios, mensajes de error, nombres de los tests y propiedades del JSON.
@@ -28,7 +27,21 @@ Entorno: Windows, con PowerShell y Git Bash.
   - El puente entre los nombres de la BD y los del código es el glosario de `database/README.md`.
   - URLs: las de negocio en español, sin tildes ni eñes (`/api/mascotas`, `/api/recuperar-contrasena`); las técnicas en inglés (`/api/health`). Criterio: si el concepto aparece en los casos de uso, va en español.
 - **JSON de la API en `camelCase` y en español** (`{ "fechaNacimiento": … }`). El modelo traduce las filas desde los nombres de la BD; los tipos viven en `src/shared/`.
-- **Citar las reglas en el código:** en SQL con `-- RN-08` y en TS con `// RN-08`; en los tests, el `describe` lleva el caso de uso y el `it` la regla (`describe('CU-23 · Solicitar una visita')`, `it('RN-xx: …')`).
+- **Citar las reglas en el código:** en SQL con `-- RN-08` y en TS con `// RN-08` (en los tests, ver la sección Tests).
+
+## Tests
+
+Las decisiones de fondo (BD de los tests, por qué no se usa ROLLBACK…) están en `docs/TECH_SPEC.md`, sección Tests. Aquí solo van reglas que se pueden comprobar al leer un test.
+
+- **Herramientas:** Vitest; las peticiones HTTP, con supertest.
+- **Dónde va cada test:** `unit/` es código puro, sin Express ni conexión a la BD; `integration/` es todo lo que pasa por Express o PostgreSQL.
+- **Nombres:** el `describe` lleva el caso de uso y el `it` la regla (`describe('CU-23 · Solicitar una visita')`, `it('RN-xx: …')`).
+  - Si un endpoint sirve a varios casos de uso: `describe('Nombre · VERBO /ruta (CU-xx, CU-yy)')`.
+  - Los tests de contrato (forma del JSON, orden) no prueban ninguna regla: su `it` va sin cita.
+- **Errores:** todo error de la API sale como `{ error: { codigo, mensaje } }`, también los 404 de ruta y los 400 de un body mal formado. El formato del 500 se prueba una vez, en `errores.test.ts` (el middleware es común a todas las rutas).
+- **Dobles de prueba:** imitan solo lo que usa el código y lo dicen en un comentario (por ejemplo, un `Pool` falso que solo tiene `query`).
+- **`console.error`:** en los tests que provocan errores, se espía y se silencia con `vi.spyOn(console, 'error').mockImplementation(() => undefined)`, y se restaura con `vi.restoreAllMocks()` en `afterEach`.
+- **Listas:** comprueba que el elemento existe antes de usar su posición (`indexOf` devuelve -1 si no está), y verifica el orden sobre la lista entera, no solo sobre un par de vecinos.
 
 ## Forma de trabajar (acordada con el usuario)
 
@@ -95,7 +108,6 @@ Se organiza **por capa**, sin agrupar por funcionalidad. Las carpetas se crean c
   - `tsconfig.json`: servidor + `shared` + tests, sin generar archivos. Lo usan VS Code y `npm run typecheck`.
   - `tsconfig.server.json`: compila `src/server` y `src/shared` a `dist/` (`npm run build`).
   - `tsconfig.client.json` (**pendiente**: se crea con el primer archivo de `src/client`): incluye `src/client` y `src/shared`, con `lib: ["DOM"]`. Así el cliente no puede importar código del servidor.
-- **Tests:** `unit/` es código puro, sin Express ni BD; `integration/` es todo lo que pasa por Express o PostgreSQL.
 - **Variables de entorno:**
   - `.env` es la configuración de desarrollo y `.env.test` la de los tests, que apunta a la BD temporal. Ninguno de los dos se versiona.
   - `.env.example` es la plantilla versionada, con valores ficticios.
