@@ -8,11 +8,12 @@ Esquema de la plataforma de adopción de mascotas (MVP). Las reglas de negocio e
 |---|---|
 | `schema.sql` | Estructura completa: tipos ENUM, tablas, claves, restricciones `CHECK`, índices, `updated_at` automático y auditoría en `audit_log` |
 | `seed.sql` | **Datos maestros**, necesarios siempre (también en producción): 52 provincias, especies, razas y el usuario administrador |
-| `seed_demo.sql` | **Datos de prueba**, solo para desarrollo y demostraciones. No cargar en producción |
+| `seed_demo.sql` | **Datos de prueba**, solo para desarrollo y demostraciones. No cargar en producción. Usa fechas relativas a `now()` (los turnos futuros siempre son futuros) y desactiva la auditoría durante la carga |
+| `dump.sql` | Copia completa (esquema + seeds) generada con `pg_dump` en PostgreSQL 18. Hay que regenerarla si cambian `schema.sql` o los seeds |
 
 ## Crear la base de datos
 
-Probado en PostgreSQL 18; requiere PostgreSQL 11 o superior. Los archivos se ejecutan en este orden.
+Probado en PostgreSQL 18; requiere PostgreSQL 11 o superior. Los comandos se ejecutan desde la carpeta `database/`, y los archivos en este orden.
 
 ```bash
 createdb adopciones
@@ -23,6 +24,8 @@ psql -d adopciones -v ON_ERROR_STOP=1 -f schema.sql -f seed.sql -f seed_demo.sql
 ```
 
 En producción se omite `seed_demo.sql`.
+
+Alternativa: restaurar la copia completa en una base de datos vacía con `psql -d adopciones -f dump.sql`.
 
 ## Usuarios de desarrollo
 

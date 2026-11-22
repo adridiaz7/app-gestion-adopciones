@@ -1,0 +1,10 @@
+{
+  // Lado servidor + tests. Lo usan VS Code y `npm run typecheck`. No genera archivos.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["src/server", "src/shared", "tests", "vitest.config.ts"]
+}

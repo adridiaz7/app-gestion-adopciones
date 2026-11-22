@@ -1,0 +1,957 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipo paleta 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   Prototipo navegable · Vista del adoptante (escritorio)
+   Paleta 1: naranja principal #F1B873 · azul de acento #73ACF1
+   Fondo: el naranja principal con luminosidad 98 % → hsl(33 82% 98%)
+   Textos en negro. Fotos: Unsplash (licencia libre).
+   ===================================================================== */
+:root{
+  /* ---- Primitivos (docs/design-system/sistema-de-diseno.md) ---- */
+  --neutral-0:#FFFFFF; --neutral-50:#FEFAF6; --neutral-100:#F9F3EB; --neutral-200:#EDE4D9; --neutral-300:#D7CDC1;
+  --neutral-400:#AC9F91; --neutral-500:#81766A; --neutral-600:#675F56; --neutral-700:#4C463E; --neutral-900:#1D1A16;
+  --primary-100:#FBECDA; --primary-200:#F8DAB5; --primary-300:#F1B873; --primary-400:#D8964B; --primary-600:#9B5E22;
+  --accent-100:#E3EEFC; --accent-300:#73ACF1; --accent-400:#4D8BD5;
+  --error-50:#FDEDEC; --error-200:#F6C2C1; --error-600:#BE2C27; --error-800:#7E1A16;
+  --success-50:#ECF9F1; --success-200:#B8E0C9; --success-600:#1E7643; --success-800:#11502B;
+  --warning-50:#FEF6DC; --warning-200:#F4D87B; --warning-600:#9D6607; --warning-800:#683D08;
+  --info-50:#EDF3FD; --info-200:#C0D5F2; --info-600:#1F5CB2; --info-800:#133D76;
+
+  /* ---- Roles: lo que usa el resto del CSS ---- */
+  --primary:var(--primary-300);          /* botón principal, navegación activa */
+  --primary-strong:var(--primary-400);   /* borde de los elementos naranjas */
+  --primary-hover:var(--primary-200);
+  --primary-soft:var(--primary-100);
+  --accent:var(--accent-300);            /* favoritos, estado destacado, contadores */
+  --accent-strong:var(--accent-400);     /* borde azul y anillo de foco */
+  --accent-soft:var(--accent-100);
+  --bg:var(--neutral-50);                /* fondo de la página */
+  --side:var(--neutral-100);
+  --card:var(--neutral-0);
+  --soft:var(--neutral-100);
+  --line:var(--neutral-200);             /* bordes suaves */
+  --line2:var(--neutral-500);            /* bordes de campos y controles (≥ 3:1) */
+  --ink:var(--neutral-900);              /* texto principal */
+  --ink2:var(--neutral-700);
+  --muted:var(--neutral-600);            /* texto secundario (≥ 4,5:1) */
+  --note:#fff1a8;
+  --r:14px;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);font-family:var(--font);color:var(--ink);font-size:14px;line-height:1.45;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0;text-align:inherit}
+input,select,textarea{font:inherit;color:inherit}
+[data-go]{cursor:pointer}
+h1,h2,h3,h4,h5{margin:0}
+:focus-visible{outline:3px solid var(--accent-strong);outline-offset:2px}
+
+/* ---------- Estructura: ocupa toda la pantalla ---------- */
+.app{height:100vh;height:100dvh;position:relative;overflow:hidden;background:var(--bg)}
+.shell{display:grid;grid-template-columns:256px minmax(0,1fr);height:100%}
+.sidebar{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:24px 18px;gap:22px;min-height:0;overflow:auto}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:42px;height:42px;border-radius:50%;background:var(--primary);color:var(--ink);display:grid;place-items:center;flex:none;border:1px solid var(--primary-strong)}
+.brand b{display:block;font-size:15px}
+.brand span{font-size:10px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.me{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;width:100%}
+.me:hover{border-color:var(--line2)}
+.me b{display:block}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--primary-soft);color:var(--ink);display:grid;place-items:center;flex:none;font-weight:600;font-size:16px;border:1px solid var(--line)}
+.nav{display:flex;flex-direction:column;gap:4px}
+.nav button{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-size:15px;color:var(--ink2)}
+.nav button:hover{background:var(--primary-soft)}
+.nav button.on{background:var(--primary);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--primary-strong)}
+.nav .count{margin-left:auto;font-size:12px;color:var(--muted)}
+.nav button.on .count{color:var(--ink)}
+.side-foot{margin-top:auto;border:1px solid var(--line);border-radius:var(--r);padding:14px;background:var(--card)}
+.main{display:flex;flex-direction:column;min-width:0;min-height:0;position:relative}
+.topbar{height:68px;flex:none;display:flex;align-items:center;gap:10px;padding:0 40px;border-bottom:1px solid var(--line)}
+.iconbtn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;position:relative;background:var(--card)}
+.iconbtn:hover{border-color:var(--ink)}
+.iconbtn .dot{position:absolute;top:8px;right:9px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--card)}
+.view{flex:1;overflow:auto;padding:32px 56px 56px;min-height:0}
+.view.has-mode{padding-bottom:120px}
+.view.flush{display:flex;flex-direction:column;padding:24px 40px}
+
+/* ---------- Elementos comunes ---------- */
+.vh h2{font-size:40px;letter-spacing:-.03em;font-weight:600;line-height:1.1}
+.vh p{color:var(--muted);margin:8px 0 0;font-size:15px}
+.utabs{display:flex;gap:30px;border-bottom:1px solid var(--line);margin:22px 0}
+.utabs button{padding:10px 0;font-size:15px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;display:inline-flex;gap:8px;align-items:center}
+.utabs button:hover{color:var(--ink)}
+.utabs button.on{color:var(--ink);border-color:var(--primary);font-weight:600}
+.utabs .n{font-size:12px;color:var(--muted);font-weight:500;background:var(--soft);border-radius:999px;padding:1px 8px}
+.ph{background:var(--primary-soft);position:relative;display:grid;place-items:center;color:var(--ink);overflow:hidden}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.sk{height:9px;border-radius:5px;background:var(--line);margin:9px 0}
+.meta{color:var(--muted);font-size:13px}
+.small{font-size:12px}
+.section-title{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:600}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:1px solid var(--line2);background:var(--card);font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--primary);color:var(--ink);border-color:var(--primary-strong);font-weight:600}
+.btn.primary:hover{background:var(--primary-hover)}
+.btn.sm{height:34px;padding:0 14px;font-size:13px}
+.btn.block{width:100%}
+.btn[disabled]{cursor:not-allowed;background:var(--neutral-100);border-color:var(--neutral-300);color:var(--neutral-600)}
+.btn.danger{background:var(--error-600);border-color:var(--error-600);color:#fff}
+.link{text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-weight:500}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid var(--ink2);white-space:nowrap;font-weight:600;background:var(--card);color:var(--ink)}
+.badge.solid{background:var(--accent);border-color:var(--accent-strong)}
+.badge.warm{background:var(--primary);border-color:var(--primary-strong)}
+.badge.soft{border-color:var(--neutral-300);color:var(--muted)}
+.badge.ok{background:var(--success-50);border-color:var(--success-600);color:var(--success-800)}
+.badge.warn{background:var(--warning-50);border-color:var(--warning-600);color:var(--warning-800)}
+.badge.err{background:var(--error-50);border-color:var(--error-600);color:var(--error-800)}
+.badge.ok::before{content:"✓"}.badge.warn::before{content:"!"}.badge.err::before{content:"✕"}
+.chip{border:1px solid var(--line2);border-radius:999px;padding:7px 14px;background:var(--card);display:inline-flex;gap:6px;align-items:center;font-size:13px;white-space:nowrap}
+.chip:hover{border-color:var(--ink)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent-strong);font-weight:600}
+.chip.on::before{content:"✓";font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.info{display:flex;gap:10px;align-items:flex-start;background:var(--info-50);border:1px solid var(--info-200);box-shadow:inset 4px 0 0 var(--info-600);border-radius:12px;padding:12px 14px 12px 18px;font-size:13px;color:var(--ink)}
+.info svg{flex:none;margin-top:1px;color:var(--info-600)}
+.round{width:56px;height:56px;border-radius:50%;border:1px solid var(--line2);background:var(--card);display:grid;place-items:center;flex:none}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .ph{width:90px;height:90px;border-radius:50%;margin:0 auto 16px}
+
+/* Notas didácticas (tecla N) */
+.note{display:none;background:var(--note);color:#4d3f00;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;margin-left:6px;vertical-align:middle;white-space:nowrap;letter-spacing:0;text-transform:none}
+body.notes .note{display:inline-block}
+.note.block{white-space:normal;margin:10px 0 0}
+body.notes .note.block{display:block}
+
+/* ---------- Explorar: modo descubrir (swipe) ---------- */
+.discover{display:flex;flex-direction:column;align-items:center;gap:18px}
+.deck-row{display:flex;align-items:center;justify-content:center;gap:48px;width:100%}
+.side-hint{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);font-size:11px;letter-spacing:.16em;text-transform:uppercase;width:120px;font-weight:600;transition:color .15s}
+.side-hint .circle{width:64px;height:64px;border-radius:50%;border:1.5px dashed var(--line2);display:grid;place-items:center;transition:.15s;background:var(--card);color:var(--ink)}
+.side-hint span{display:inline-flex;align-items:center;gap:6px}
+.side-hint:hover .circle{border-style:solid;border-color:var(--ink)}
+.side-hint.active{color:var(--ink)}
+.side-hint.active .circle{border-style:solid;transform:scale(1.1)}
+#hintL.active .circle{background:var(--ink);border-color:var(--ink);color:#fff}
+#hintR.active .circle{background:var(--accent);border-color:var(--accent-strong)}
+.deck{position:relative;width:340px;height:440px;flex:none}
+.pcard{position:absolute;inset:0;border-radius:24px;overflow:hidden;background:var(--primary-soft);box-shadow:0 14px 34px rgba(80,50,10,.18);user-select:none;-webkit-user-select:none;transition:transform .3s ease,opacity .3s ease;transform-origin:50% 90%}
+.pcard.top{cursor:grab;touch-action:none}
+.pcard.top:active{cursor:grabbing}
+.pcard .ph{position:absolute;inset:0}
+.pcard img{pointer-events:none;-webkit-user-drag:none}
+.pcard .ov{position:absolute;left:12px;right:12px;bottom:12px;padding:14px 16px;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border-radius:16px;color:var(--ink);display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.pcard .shel{font-size:10px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:6px;align-items:center;color:var(--muted);font-weight:600}
+.pcard h3{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:2px 0 0}
+.stamp{position:absolute;top:24px;display:inline-flex;gap:6px;align-items:center;padding:7px 12px;border:2px solid var(--ink);border-radius:8px;font-weight:700;letter-spacing:.12em;font-size:12px;text-transform:uppercase;opacity:0;pointer-events:none;color:var(--ink)}
+.stamp.fav{left:20px;transform:rotate(-10deg);background:var(--accent)}
+.stamp.dis{right:20px;transform:rotate(10deg);background:#fff}
+.pcard.wiggle{animation:wiggle 1.8s ease-in-out .6s 2}
+@keyframes wiggle{0%,100%{transform:translateX(0) rotate(0)}18%{transform:translateX(-34px) rotate(-5deg)}40%{transform:translateX(34px) rotate(5deg)}58%{transform:translateX(-12px) rotate(-1.5deg)}72%{transform:translateX(0) rotate(0)}}
+.swipe-hint{display:inline-flex;align-items:center;gap:10px;font-size:13px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px}
+.swipe-hint .hand{display:inline-flex;animation:hand 1.6s ease-in-out infinite}
+@keyframes hand{0%,100%{transform:translateX(-7px) rotate(-8deg)}50%{transform:translateX(7px) rotate(8deg)}}
+
+/* Selector descubrir / buscador (solo en la pestaña Mascotas) */
+.mode{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;display:flex;gap:4px;padding:5px;border-radius:999px;background:var(--card);border:1px solid var(--line2);box-shadow:0 10px 26px rgba(80,50,10,.14);z-index:6}
+.mode button{height:44px;min-width:44px;padding:0 14px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:13px;font-weight:600}
+.mode button:hover{color:var(--ink);background:var(--soft)}
+.mode button.on{background:var(--primary);color:var(--ink);box-shadow:inset 0 0 0 1px var(--primary-strong)}
+.mode .lbl{display:none}
+.mode button.on .lbl{display:inline}
+
+/* ---------- Explorar: buscador y protectoras ---------- */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;margin-left:6px}
+.switch i{width:36px;height:22px;border-radius:999px;background:var(--accent);border:1px solid var(--accent-strong);position:relative;flex:none}
+.switch i::after{content:"";position:absolute;right:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.results-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;color:var(--muted);gap:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.gcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;position:relative;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s,border-color .15s}
+.gcard:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:0 10px 24px rgba(80,50,10,.1)}
+.gcard>.ph{aspect-ratio:4/3}
+.gcard .body{padding:12px 14px 14px}
+.gcard h4{font-size:17px;font-weight:600}
+.gcard.faded>.ph img{filter:grayscale(.7);opacity:.7}
+.fav-btn{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;background:var(--card);display:grid;place-items:center;border:1px solid var(--line);z-index:1}
+.fav-btn.on{background:var(--accent);border-color:var(--accent-strong)}
+.badge.over{position:absolute;top:12px;left:12px;z-index:1}
+.search{display:flex;align-items:center;gap:8px;height:42px;border:1px solid var(--line2);border-radius:999px;padding:0 16px;background:var(--card);flex:1;min-width:0;max-width:440px}
+.search input{border:0;outline:0;background:none;flex:1;min-width:0}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.scard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;transition:border-color .15s,box-shadow .15s}
+.scard:hover{border-color:var(--line2);box-shadow:0 10px 24px rgba(80,50,10,.08)}
+.slogo{border-radius:50%;background:var(--primary-soft);border:1px solid var(--primary);display:grid;place-items:center;font-weight:700;color:var(--ink);flex:none}
+.scard .slogo{width:64px;height:64px;font-size:20px}
+.scard h4{font-size:16px}
+.scard .pets{display:flex;margin-top:12px}
+.scard .pets .ph{width:38px;height:38px;border-radius:50%;border:2px solid #fff;margin-right:-8px}
+.scard-foot{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:12px}
+
+/* ---------- Ficha ---------- */
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);margin-bottom:18px;font-weight:500}
+.back:hover{color:var(--ink)}
+.ficha{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:36px;align-items:start}
+.ph.main{aspect-ratio:4/3;border-radius:var(--r)}
+.thumbs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:8px}
+.thumbs button{aspect-ratio:1;border-radius:10px;padding:0;overflow:hidden;position:relative;border:2px solid transparent}
+.thumbs button.on{border-color:var(--primary-strong)}
+.thumbs img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.fsec{margin-top:28px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.facts div{background:var(--card);padding:10px 14px}
+.facts small{display:block;color:var(--muted);font-size:12px}
+.checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.checks span{display:flex;gap:8px;align-items:center}
+.checks svg{background:var(--accent-soft);border-radius:50%;padding:2px;box-sizing:content-box}
+.aside{position:sticky;top:0;display:flex;flex-direction:column;gap:14px}
+.shel-link{display:inline-flex;gap:8px;align-items:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.shel-link:hover{color:var(--ink)}
+.pname{font-size:42px;font-weight:600;letter-spacing:-.03em;margin:6px 0 2px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 10px}
+.actions .btn.primary{flex:1}
+.btn.fav-on{background:var(--accent);border-color:var(--accent-strong)}
+.meter{display:flex;gap:5px;margin:4px 0 8px}
+.meter i{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.meter i.on{background:var(--primary);box-shadow:inset 0 0 0 1px var(--primary-strong)}
+.prose p{margin:0 0 10px}
+
+/* ---------- Perfil de protectora ---------- */
+.shead{display:flex;gap:20px;align-items:center}
+.shead .slogo{width:96px;height:96px;font-size:30px}
+.shead h2{font-size:32px;font-weight:600;letter-spacing:-.02em;margin:2px 0 6px}
+.two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;margin:16px 0 30px}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:10px 16px;margin:0}
+.dl dt{color:var(--muted)}
+.dl dd{margin:0}
+.h3{font-size:20px;font-weight:600;margin-bottom:14px}
+
+/* ---------- Visitas y adopciones ---------- */
+.quota{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:22px}
+.quota b{display:block}
+.rows{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:64px minmax(140px,1fr) minmax(130px,.9fr) 140px minmax(0,1.5fr);gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px}
+.row>.ph{width:64px;height:64px;border-radius:12px}
+.row .sub{color:var(--muted);font-size:13px}
+.r-act{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;text-align:right;min-width:0}
+.row{grid-template-columns:64px minmax(140px,1fr) minmax(120px,.8fr) auto minmax(200px,1.5fr)}
+@media (max-width:1180px){
+  .row{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr) auto}
+  .row>.ph{grid-row:span 2}
+  .r-act{grid-column:2 / -1;justify-content:flex-start;text-align:left}
+}
+
+/* ---------- Mensajes ---------- */
+.chat{flex:1;min-height:0;display:grid;grid-template-columns:340px minmax(0,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--card)}
+.clist{border-right:1px solid var(--line);overflow:auto;display:flex;flex-direction:column}
+.clist-head{padding:16px;border-bottom:1px solid var(--line)}
+.citem{display:flex;gap:12px;padding:14px 16px;width:100%;border-bottom:1px solid var(--line);align-items:flex-start}
+.citem:hover{background:var(--soft)}
+.citem.on{background:var(--primary-soft);box-shadow:inset 4px 0 0 var(--primary-strong)}
+.citem .slogo{width:44px;height:44px;font-size:14px}
+.citem .t{display:flex;justify-content:space-between;gap:8px}
+.citem .last{color:var(--muted);font-size:13px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.unread{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent);color:var(--ink);font-size:11px;font-weight:700;display:inline-grid;place-items:center;flex:none}
+.cpane{display:flex;flex-direction:column;min-height:0;min-width:0}
+.chead{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.chead .slogo{width:40px;height:40px;font-size:13px}
+.ctx{display:flex;align-items:center;gap:10px;padding:9px 16px;background:var(--accent-soft);border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
+.msgs{flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.msg{max-width:64%;padding:10px 14px;border-radius:16px 16px 16px 4px;background:var(--card);border:1px solid var(--line);align-self:flex-start}
+.msg.me{align-self:flex-end;background:var(--primary);border-color:var(--primary-strong);border-radius:16px 16px 4px 16px}
+.msg small{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+.msg.me small{color:#4a3a22}
+.msg .ph{width:240px;max-width:100%;aspect-ratio:4/3;border-radius:10px}
+.sys{align-self:center;text-align:center;font-size:12px;color:var(--ink2);border:1px dashed var(--line2);border-radius:999px;padding:5px 12px;background:var(--card)}
+.datesep{align-self:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:6px 0;font-weight:600}
+.composer{display:flex;gap:8px;align-items:center;padding:12px;border-top:1px solid var(--line)}
+.composer input{flex:1;min-width:0;height:44px;border:1px solid var(--line2);border-radius:999px;padding:0 16px;background:var(--soft);outline:0}
+.composer input:focus{border-color:var(--accent-strong)}
+.send{background:var(--primary)!important;border-color:var(--primary-strong)!important}
+
+/* ---------- Notificaciones ---------- */
+.pop{position:absolute;top:62px;right:28px;width:400px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 44px rgba(80,50,10,.18);z-index:15;overflow:hidden}
+.pop-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.pop-foot{padding:12px 16px;text-align:center}
+.nitem{display:flex;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);width:100%;align-items:flex-start}
+.nitem:hover{background:var(--soft)}
+.nitem.is-unread{background:var(--accent-soft)}
+.nitem .ic{width:38px;height:38px;border-radius:10px;background:var(--primary-soft);display:grid;place-items:center;flex:none}
+.nitem .txt{flex:1;min-width:0}
+.ndot{width:10px;height:10px;border-radius:50%;background:var(--accent-strong);margin-top:6px;flex:none}
+.nlist{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:22px}
+.nlist .nitem:last-child{border-bottom:0}
+
+/* ---------- Perfil ---------- */
+.pref-group{padding:18px 0;border-bottom:1px solid var(--line)}
+.pref-group h4{font-size:15px}
+.pref-group p{margin:2px 0 12px;color:var(--muted);font-size:13px}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.field .inp{height:44px;border:1px solid var(--line2);border-radius:10px;background:var(--card);display:flex;align-items:center;padding:0 12px;color:var(--ink)}
+.field.wide{grid-column:1/-1}
+.field .inp.tall{height:88px;align-items:flex-start;padding-top:10px}
+.form-foot{display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:22px;flex-wrap:wrap}
+
+/* ---------- Modal ---------- */
+.overlay{position:absolute;inset:0;background:rgba(40,28,10,.35);display:grid;place-items:center;z-index:20;padding:20px}
+.modal{background:var(--card);border-radius:20px;width:min(580px,100%);max-height:100%;overflow:auto;padding:26px;display:flex;flex-direction:column;gap:16px;box-shadow:0 30px 60px rgba(40,28,10,.25)}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.modal-head .who{display:flex;gap:14px;align-items:center}
+.modal-head .ph{width:64px;height:64px;border-radius:14px;flex:none}
+.modal-head h3{font-size:22px;font-weight:600}
+.week{display:flex;justify-content:space-between;align-items:center}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.day{padding:10px 4px;border:1px solid var(--line2);border-radius:12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--card)}
+.day:hover{border-color:var(--ink)}
+.day b{font-size:17px}
+.day small{font-size:11px;color:var(--muted)}
+.day.on{background:var(--primary);border-color:var(--primary-strong)}
+.day.on small{color:var(--ink)}
+.day[disabled]{opacity:.45;cursor:not-allowed;background:var(--soft)}
+.slots{display:flex;flex-direction:column;gap:8px}
+.slot{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--line2);border-radius:12px}
+.slot:hover{border-color:var(--ink)}
+.slot.on{border-color:var(--primary-strong);background:var(--primary-soft);box-shadow:inset 0 0 0 1px var(--primary-strong)}
+.slot[disabled]{opacity:.5;cursor:not-allowed}
+.modal-foot{display:flex;gap:10px;justify-content:flex-end}
+
+.toast{position:absolute;left:50%;bottom:100px;transform:translate(-50%,16px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:30;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.credit{position:absolute;right:14px;bottom:8px;font-size:10px;color:var(--muted);z-index:1}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* =====================================================================
+   Iconos
+   ===================================================================== */
+const I = {
+  compass:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  heartf:'<path fill="currentColor" d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+  calendar:'<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  file:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  left:'<path d="M15 6l-6 6 6 6"/>',
+  right:'<path d="m9 6 6 6-6 6"/>',
+  arrowR:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  arrowL:'<path d="M19 12H5M11 6l-6 6 6 6"/>',
+  paw:'<circle cx="6.5" cy="10.5" r="1.8"/><circle cx="17.5" cy="10.5" r="1.8"/><circle cx="9.5" cy="6" r="1.8"/><circle cx="14.5" cy="6" r="1.8"/><path d="M12 12c-3 0-5.5 3.6-5.5 5.6S9 20.4 12 19.4s5.5.2 5.5-1.8S15 12 12 12z"/>',
+  send:'<path d="M4 12 20 4l-6 16-3-7z"/>',
+  clip:'<path d="m20 11.5-8 8a5 5 0 0 1-7-7l8-8a3.3 3.3 0 0 1 4.7 4.7l-8 8a1.7 1.7 0 0 1-2.4-2.4l7.3-7.3"/>',
+  check:'<path d="m5 12 5 5 9-10"/>',
+  pin:'<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  filter:'<path d="M4 6h16M7 12h10M10 18h4"/>',
+  hand:'<path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.5 14a1.5 1.5 0 0 1 2.4-1.8L9 15"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  shield:'<path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/><path d="m9 12 2 2 4-4"/>',
+  chevD:'<path d="m6 9 6 6 6-6"/>',
+  sliders:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+  ban:'<circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/>'
+};
+const ic = (n, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
+const sk = w => `<div class="sk" style="width:${w}%"></div>`;
+const note = (t, block) => `<span class="note${block ? ' block' : ''}">${t}</span>`;
+
+/* Fotos de Unsplash (licencia libre) */
+const img = (id, w = 800) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=70`;
+const photo = (p, w, pos) => `<img src="${img(p.img, w)}" alt="Foto de ${p.name}" loading="lazy" draggable="false" ${pos?`style="object-position:${pos}"`:''}>`;
+const initials = name => name.split(' ').filter(w => w.length > 3).slice(-2).map(w => w[0]).join('').toUpperCase();
+
+/* =====================================================================
+   Datos de ejemplo (seed_demo.sql)
+   ===================================================================== */
+const SHELTERS = [
+  {id:1, name:'Protectora Huellas de Valencia', city:'Valencia', prov:'Valencia/València',
+   about:'Rescatamos perros y gatos abandonados en la comarca de L\'Horta desde 2012.',
+   address:'Camí del Riu, 15 · 46019 Valencia', phone:'961 000 001', email:'info@huellasvalencia.test', web:'huellasvalencia.test', hours:'L–V 10:00–14:00 y 17:00–19:00 · S 10:00–13:00'},
+  {id:2, name:'Asociación Bigotes Libres', city:'Madrid', prov:'Madrid',
+   about:'Asociación felina con colonias controladas y casas de acogida en Madrid.',
+   address:'Calle del Gato, 7 · 28045 Madrid', phone:'911 000 002', email:'hola@bigoteslibres.test', web:'bigoteslibres.test', hours:'L–S 11:00–14:00'}
+];
+const PETS = [
+  {id:2,  name:'Luna',   sp:'Perro', breed:'Mestizo / Desconocida', age:'2 años', sex:'Hembra', size:'Mediana', act:'Media', sh:1, img:'1543466835-00a7907e9de1'},
+  {id:1,  name:'Toby',   sp:'Perro', breed:'Labrador Retriever',    age:'4 años', sex:'Macho',  size:'Grande',  act:'Alta',  sh:1, img:'1537204696486-967f1b7198c8'},
+  {id:3,  name:'Rocky',  sp:'Perro', breed:'Podenco Andaluz',       age:'3 años', sex:'Macho',  size:'Mediano', act:'Alta',  sh:1, img:'1615881531311-a29f968ab2c1'},
+  {id:4,  name:'Nala',   sp:'Perro', breed:'Galgo Español',         age:'5 años', sex:'Hembra', size:'Grande',  act:'Baja',  sh:1, img:'1633835080106-0832760e904b'},
+  {id:5,  name:'Coco',   sp:'Perro', breed:'Bodeguero Andaluz',     age:'1 año',  sex:'Macho',  size:'Pequeño', act:'Alta',  sh:1, img:'1597513299114-bfab8234a241'},
+  {id:8,  name:'Thor',   sp:'Perro', breed:'Mastín Español',        age:'7 años', sex:'Macho',  size:'Grande',  act:'Baja',  sh:1, img:'1594738985551-b2e28db213a0'},
+  {id:16, name:'Nube',   sp:'Gato',  breed:'Angora Turco',          age:'3 años', sex:'Hembra', size:'Pequeña', act:'Baja',  sh:2, img:'1606208427954-aa8319c4815e'},
+  {id:17, name:'Tigre',  sp:'Gato',  breed:'Bengalí',               age:'2 años', sex:'Macho',  size:'Mediano', act:'Alta',  sh:2, img:'1603277160434-df7471138363'},
+  {id:20, name:'Canela', sp:'Perro', breed:'Beagle',                age:'3 años', sex:'Hembra', size:'Mediana', act:'Alta',  sh:2, img:'1611306133736-56a3b973b2cc'},
+  {id:19, name:'Oliver', sp:'Gato',  breed:'Siamés',                age:'6 años', sex:'Macho',  size:'Pequeño', act:'Media', sh:2, img:'1568152950566-c1bf43f4ab28'},
+  {id:7,  name:'Kira',   sp:'Perro', breed:'Border Collie',         age:'2 años', sex:'Hembra', size:'Mediana', act:'Alta',  sh:1, img:'1503256207526-0d5d80fa2f47', status:'Reservada'},
+  {id:13, name:'Michi',  sp:'Gato',  breed:'Común Europeo',         age:'2 años', sex:'Macho',  size:'Pequeño', act:'Media', sh:2, img:'1588943011511-ef303c037195', status:'Adoptada'},
+  {id:11, name:'Misi',   sp:'Gato',  breed:'Común Europeo',         age:'3 años', sex:'Hembra', size:'Pequeña', act:'Baja',  sh:1, img:'1574144611937-0df059b5ef3e', status:'Adoptada'}
+];
+const pet = id => PETS.find(p => p.id === id);
+const shelter = id => SHELTERS.find(s => s.id === id);
+const available = () => PETS.filter(p => !p.status);
+
+const VISITS = [
+  {pet:2,  date:'Lun 23 nov', time:'10:00 – 11:00', st:'Confirmada',  k:'solid',     tab:'proximas',  hint:'Puedes cancelar hasta 24 h antes', acts:['chat','cancel']},
+  {pet:5,  date:'Jue 26 nov', time:'17:00 – 18:00', st:'Pendiente',   k:'',          tab:'proximas',  hint:'La protectora tiene 24 h para responder', acts:['cancel']},
+  {pet:1,  date:'Lun 16 nov', time:'11:00 – 12:00', st:'Realizada',   k:'ok',        tab:'historial', hint:'', acts:['adopt']},
+  {pet:17, date:'Jue 19 nov', time:'12:00 – 13:00', st:'Caducada',    k:'warn',      tab:'historial', hint:'La protectora no respondió a tiempo'},
+  {pet:19, date:'Lun 2 nov',  time:'18:00 – 19:00', st:'No asistida', k:'err',       tab:'historial', hint:'La protectora registró tu ausencia', acts:['incident']},
+  {pet:20, date:'Sáb 7 nov',  time:'10:00 – 11:00', st:'Rechazada',   k:'err',       tab:'historial', hint:'Motivo indicado por la protectora'},
+  {pet:3,  date:'Mié 28 oct', time:'16:00 – 17:00', st:'Anulada',     k:'soft',      tab:'historial', hint:'La protectora eliminó el turno'},
+  {pet:16, date:'Mar 20 oct', time:'18:00 – 19:00', st:'Cancelada',   k:'soft',      tab:'historial', hint:'Cancelada por ti'}
+];
+const ADOPTIONS = [
+  {pet:4,  date:'Solicitada el 17 nov', st:'Pendiente',       k:'',     tab:'curso',     hint:'La protectora está valorando a los candidatos', acts:['chat','cancel']},
+  {pet:7,  date:'Aprobada el 12 nov',   st:'Aprobada',        k:'solid',tab:'curso',     hint:'Pendiente de entrega: acordad la fecha por el chat', acts:['chat','cancel']},
+  {pet:13, date:'14 oct',               st:'No seleccionada', k:'soft', tab:'historial', hint:'La protectora eligió a otra persona'},
+  {pet:11, date:'Entregada el 2 oct',   st:'Completada',      k:'ok', tab:'historial', hint:''},
+  {pet:16, date:'20 sep',               st:'Cancelada',       k:'soft', tab:'historial', hint:'Cancelada por ti'}
+];
+const CONVS = [
+  {id:1, sh:1, last:'Perfecto, te esperamos el lunes a las 10:00.', when:'10:24', unread:2,
+   ctx:'Visita a <b>Luna</b> · Confirmada · Lun 23 nov, 10:00', ctxGo:'visitas',
+   msgs:[
+     ['date','Miércoles 18 nov'],
+     ['sys','Lucía ha solicitado una visita para conocer a Luna · mensaje automático'],
+     ['me','Hola, me encantaría conocer a Luna. ¿Se lleva bien con gatos?','18:02 · Leído'],
+     ['them','¡Hola, Lucía! Sí, convive con dos gatos en su casa de acogida. Te mandamos una foto de esta mañana.','18:40'],
+     ['img','1604606363386-dd3f2357ad87','18:41'],
+     ['date','Hoy'],
+     ['sys','Visita confirmada · Lun 23 nov, 10:00 – 11:00'],
+     ['them','Perfecto, te esperamos el lunes a las 10:00.','10:24']
+   ]},
+  {id:2, sh:2, last:'Lo sentimos, Michi ya ha encontrado familia.', when:'14 oct', unread:0,
+   ctx:'Adopción de <b>Michi</b> · No seleccionada', ctxGo:'solicitudes',
+   msgs:[
+     ['date','2 oct'],
+     ['sys','Lucía ha solicitado la adopción de Michi · mensaje automático'],
+     ['them','Gracias por tu solicitud, la revisamos esta semana.','11:15'],
+     ['me','¡Genial! Quedo atenta.','11:30 · Leído'],
+     ['date','14 oct'],
+     ['sys','Solicitud no seleccionada'],
+     ['them','Lo sentimos, Michi ya ha encontrado familia.','09:05']
+   ]}
+];
+const NOTIFS = [
+  {ic:'calendar', t:'La protectora ha confirmado tu visita a <b>Luna</b>', d:'Lun 23 nov · 10:00 – 11:00', when:'Hace 2 h', go:'visitas', grp:'Hoy'},
+  {ic:'file',     t:'Tu solicitud de adopción de <b>Kira</b> ha sido aprobada', d:'Acordad la entrega por el chat', when:'Hace 5 h', go:'solicitudes', grp:'Hoy'},
+  {ic:'clock',    t:'Tu solicitud de visita a <b>Tigre</b> ha caducado', d:'La protectora no respondió en 24 h', when:'Ayer', go:'visitas', grp:'Esta semana'},
+  {ic:'calendar', t:'Tu visita a <b>Toby</b> se ha marcado como realizada', d:'Ya puedes solicitar su adopción', when:'Hace 4 días', go:'visitas', grp:'Esta semana'},
+  {ic:'file',     t:'<b>Michi</b> ha encontrado familia', d:'Tu solicitud ha quedado como no seleccionada', when:'14 oct', go:'solicitudes', grp:'Anteriores'}
+];
+const DAYS = [
+  {d:'Lun', n:23, slots:[['10:00 – 11:00',2],['11:00 – 12:00',0],['17:00 – 18:00',1]]},
+  {d:'Mar', n:24, slots:[]},
+  {d:'Mié', n:25, slots:[['10:00 – 11:00',3]]},
+  {d:'Jue', n:26, slots:[['17:00 – 18:00',2],['18:00 – 19:00',1]]},
+  {d:'Vie', n:27, slots:[['10:00 – 11:00',1]]},
+  {d:'Sáb', n:28, slots:[['10:00 – 12:00',4]]},
+  {d:'Dom', n:29, slots:[]}
+];
+const THUMBS = ['50% 50%','30% 40%','70% 30%','50% 20%','40% 70%','60% 60%'];
+
+/* =====================================================================
+   Estado
+   ===================================================================== */
+const S = {
+  screen:'explorar', tab:'mascotas', mode:'descubrir',
+  pet:2, shelter:1, conv:1, thumb:0,
+  favs:new Set([16, 20, 7]),
+  deck: available().map(p => p.id),
+  wiggled:false, pop:false, modal:false, day:0, slot:null,
+  visTab:'proximas', adTab:'curso', profTab:'pref', allRead:false
+};
+
+/* =====================================================================
+   Piezas comunes
+   ===================================================================== */
+const NAV = [
+  ['explorar',   'compass',  'Explorar'],
+  ['favoritos',  'heart',    'Favoritos'],
+  ['mensajes',   'chat',     'Mensajes'],
+  ['visitas',    'calendar', 'Visitas'],
+  ['solicitudes','file',     'Adopciones']
+];
+const navCount = k => k === 'favoritos' ? S.favs.size : k === 'mensajes' ? 2 : '';
+const section = () => ({ficha:'explorar', protectora:'explorar', notificaciones:'', perfil:''}[S.screen] ?? S.screen);
+const slogo = s => `<div class="slogo" aria-hidden="true">${initials(s.name)}</div>`;
+
+function sidebar(){
+  return `<aside class="sidebar">
+    <div class="brand"><div class="logo">${ic('paw')}</div><div><b>Nombre de la app</b><span>Eslogan breve</span></div></div>
+    <button class="me" data-go="perfil"><div class="avatar">L</div>
+      <div style="flex:1;min-width:0"><b>Hola, Lucía</b><span class="meta">Ver mi perfil</span></div>${ic('right',16)}</button>
+    <nav class="nav">${NAV.map(([k,i,l]) => `<button class="${section()===k?'on':''}" data-go="${k}">${ic(i)} ${l}<span class="count">${navCount(k)}</span></button>`).join('')}</nav>
+    <div class="side-foot"><b>Bloque informativo</b>${sk(92)}${sk(70)}</div>
+  </aside>`;
+}
+function topbar(){
+  return `<header class="topbar"><div style="flex:1"></div>
+    <button class="iconbtn" data-act="pop" aria-label="Notificaciones">${ic('bell')}${S.allRead?'':'<span class="dot"></span>'}</button>
+  </header>`;
+}
+function modeToggle(){
+  const disc = S.mode === 'descubrir';
+  return `<div class="mode" role="group" aria-label="Forma de buscar">
+    <button class="${disc?'on':''}" data-act="mode" data-v="descubrir" title="Modo descubrir" aria-pressed="${disc}">${ic('heart',18)}<span class="lbl">Descubrir</span></button>
+    <button class="${disc?'':'on'}" data-act="mode" data-v="buscador" title="Buscador" aria-pressed="${!disc}">${ic('search',18)}<span class="lbl">Buscador</span></button>
+  </div>`;
+}
+function petCard(p, opts = {}){
+  const sh = shelter(p.sh), fav = S.favs.has(p.id);
+  return `<div class="gcard ${p.status?'faded':''}" data-go="ficha" data-pet="${p.id}" tabindex="0">
+    <div class="ph">${photo(p, 600)}</div>
+    ${p.status?`<span class="badge warm over">${p.status}</span>`:''}
+    <button class="fav-btn ${fav?'on':''}" data-act="fav" data-id="${p.id}" aria-label="${fav?'Quitar de':'Añadir a'} favoritos" aria-pressed="${fav}">${ic(fav?'heartf':'heart',16)}</button>
+    <div class="body"><h4>${p.name}</h4><div class="meta">${p.breed}</div>
+      <div class="meta">${p.age} · ${p.sex} · ${p.size}</div>
+      ${opts.noShelter?'':`<div class="meta small" style="margin-top:6px;display:flex;gap:4px;align-items:center">${ic('pin',12)} ${sh.city} · ${sh.name}</div>`}
+    </div></div>`;
+}
+const badge = r => `<span class="badge ${r.k}">${r.st}</span>`;
+
+/* =====================================================================
+   Pantallas
+   ===================================================================== */
+const V = {};
+
+V.explorar = () => {
+  const head = `<div class="vh"><h2>Título principal de la vista</h2><p>Texto de apoyo breve. Los textos definitivos se decidirán más adelante.</p></div>
+  <div class="utabs" role="tablist">
+    <button class="${S.tab==='mascotas'?'on':''}" data-act="tab" data-v="mascotas" role="tab">Mascotas</button>
+    <button class="${S.tab==='protectoras'?'on':''}" data-act="tab" data-v="protectoras" role="tab">Protectoras ${note('CU-13 · RN-69')}</button>
+  </div>`;
+  let body;
+  if (S.tab === 'protectoras') body = shelterSearch();
+  else if (S.mode === 'descubrir') body = discover();
+  else body = gallery();
+  return {html: head + body, cls: S.tab==='mascotas' ? 'has-mode' : '', after: S.tab==='mascotas' && S.mode==='descubrir' ? bindDeck : null};
+};
+
+function discover(){
+  if (!S.deck.length) return `<div class="empty"><div class="ph">${ic('paw',28)}</div>
+    <h3 style="color:var(--ink);margin-bottom:6px">No quedan mascotas compatibles</h3>
+    <p>Texto de apoyo: prueba a ampliar tus preferencias o usa el buscador.</p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
+      <button class="btn" data-go="perfil">${ic('sliders',16)} Editar preferencias</button>
+      <button class="btn primary" data-act="resetDeck">Volver a empezar</button></div></div>`;
+  const cards = S.deck.slice(0,3).map((id,depth) => {
+    const p = pet(id), sh = shelter(p.sh), top = depth === 0;
+    return `<div class="pcard ${top?'top':''} ${top&&!S.wiggled?'wiggle':''}" style="z-index:${3-depth};${top?'':`transform:translateY(${depth*16}px) scale(${1-depth*.05})`}">
+      <div class="ph">${photo(p, 700)}</div>
+      <div class="stamp fav">${ic('heartf',14)} Favorito</div>
+      <div class="stamp dis">${ic('x',14)} Descartar</div>
+      <div class="ov"><div><div class="shel">${ic('paw',12)} ${sh.name}</div><h3>${p.name}</h3><div class="meta" style="color:var(--ink2)">${p.age} · ${p.sex} · ${p.size}</div></div>
+        <button class="btn sm primary" data-go="ficha" data-pet="${p.id}">Ver ficha ${ic('arrowR',14)}</button></div>
+    </div>`;
+  }).reverse().join('');
+  return `<div class="discover">
+    <div class="deck-row">
+      <button class="side-hint" id="hintL" data-act="swipe" data-dir="-1" aria-label="Descartar"><div class="circle">${ic('x',24)}</div><span>${ic('arrowL',14)} Descartar</span></button>
+      <div class="deck" id="deck">${cards}</div>
+      <button class="side-hint" id="hintR" data-act="swipe" data-dir="1" aria-label="Favorito"><div class="circle">${ic('heart',24)}</div><span>Favorito ${ic('arrowR',14)}</span></button>
+    </div>
+    <div class="swipe-hint"><span class="hand">${ic('hand',18)}</span>Arrastra la tarjeta: ← descartar · favorito →</div>
+    <p class="meta" style="margin:0">Quedan ${S.deck.length} mascotas compatibles con tus preferencias · <span class="link" data-go="perfil">Editar preferencias</span></p>
+    ${note('CU-10 · Solo mascotas compatibles · un descarte caduca a los 30 días · también con las flechas ← →')}
+  </div>`;
+}
+
+function gallery(){
+  const list = available();
+  const f = ['Especie','Raza','Tamaño','Edad','Sexo','Provincia'];
+  return `<div class="filters">
+      ${f.map(x => `<button class="chip">${x} ${ic('chevD',14)}</button>`).join('')}
+      <span class="switch"><i></i>Solo compatibles conmigo</span>
+    </div>
+    <div class="results-bar"><span>${list.length} mascotas ${note('CU-09')}</span><button class="chip">Más recientes ${ic('chevD',14)}</button></div>
+    <div class="grid">${list.map(p => petCard(p)).join('')}</div>
+    <div style="text-align:center;margin-top:24px"><button class="btn">Cargar más</button></div>`;
+}
+
+function shelterSearch(){
+  return `<div class="filters">
+      <div class="search">${ic('search',16)}<input placeholder="Buscar protectora por nombre" aria-label="Buscar protectora"></div>
+      <button class="chip">${ic('pin',14)} Provincia ${ic('chevD',14)}</button>
+    </div>
+    <div class="results-bar"><span>${SHELTERS.length} protectoras ${note('Solo validadas y no suspendidas')}</span></div>
+    <div class="sgrid">${SHELTERS.map(s => {
+      const list = PETS.filter(p => p.sh === s.id && !p.status);
+      return `<div class="scard" data-go="protectora" data-shelter="${s.id}" tabindex="0">
+        ${slogo(s)}
+        <div><h4>${s.name}</h4><div class="meta" style="display:flex;gap:4px;align-items:center">${ic('pin',12)} ${s.city} (${s.prov})</div>
+          <p class="meta" style="margin:8px 0 0;color:var(--ink2)">${s.about}</p>
+          <div class="pets">${list.slice(0,5).map(p => `<div class="ph">${photo(p, 120)}</div>`).join('')}</div></div>
+        <div class="scard-foot"><span class="meta">${list.length} mascotas disponibles</span><span class="link">Ver perfil</span></div>
+      </div>`;}).join('')}</div>`;
+}
+
+V.ficha = () => {
+  const p = pet(S.pet), sh = shelter(p.sh), fav = S.favs.has(p.id);
+  const ok = t => `<span>${ic('check',14)} ${t}</span>`;
+  const used = p.sh === 1 ? 2 : 0;
+  const f = p.sex === 'Hembra';
+  return {html:`<button class="back" data-go="explorar">${ic('arrowL',16)} Volver a explorar</button>
+  <div class="ficha">
+    <div>
+      <div class="ph main">${photo(p, 1200, THUMBS[S.thumb])}</div>
+      <div class="thumbs">${THUMBS.map((pos,i) => `<button class="${i===S.thumb?'on':''}" data-act="thumb" data-v="${i}" aria-label="Foto ${i+1}">${photo(p, 200, pos)}</button>`).join('')}</div>
+      ${note('Hasta 6 fotos por mascota (en el prototipo se repite la misma foto)', true)}
+      <section class="fsec prose"><h5 class="section-title">Sobre ${p.name}</h5>
+        <p>Texto de ejemplo con la descripción de ${p.name}: carácter, historia y rutina. ${f?'Es muy cariñosa':'Es muy cariñoso'} y le encanta pasear.</p>${sk(90)}${sk(60)}</section>
+      <section class="fsec"><h5 class="section-title">Características</h5>
+        <div class="facts">
+          <div><small>Especie</small>${p.sp}</div><div><small>Raza</small>${p.breed}</div>
+          <div><small>Edad aproximada</small>${p.age}</div><div><small>Sexo</small>${p.sex}</div>
+          <div><small>Tamaño</small>${p.size}</div><div><small>Nivel de actividad</small>${p.act}</div>
+        </div></section>
+      <section class="fsec"><h5 class="section-title">Convivencia</h5>
+        <div class="facts"><div><small>Con niños</small>Sí</div><div><small>Con perros</small>Sí</div><div><small>Con gatos</small>Sí</div><div><small>Otros</small>Desconocido</div></div></section>
+      <section class="fsec"><h5 class="section-title">Salud</h5>
+        <div class="checks">${ok(f?'Vacunada':'Vacunado')}${ok(f?'Desparasitada':'Desparasitado')}${ok(f?'Esterilizada':'Esterilizado')}${ok('Con microchip')}</div>
+        <p class="meta">Necesidades especiales: ninguna</p></section>
+    </div>
+    <aside class="aside">
+      <div class="panel">
+        <button class="shel-link" data-go="protectora" data-shelter="${sh.id}">${ic('paw',14)} ${sh.name} ${ic('right',12)}</button>
+        <h1 class="pname">${p.name}</h1>
+        <div class="meta">${p.breed} · ${p.age} · ${p.sex} · ${p.size}</div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px">${p.status?`<span class="badge warm">${p.status}</span>`:'<span class="badge solid">Disponible</span>'}<span class="meta" style="display:flex;gap:4px;align-items:center">${ic('pin',12)} ${sh.city}</span></div>
+        <div class="actions">
+          <button class="btn primary" data-act="visit" ${p.status?'disabled':''}>${ic('calendar',16)} Solicitar visita</button>
+          <button class="btn ${fav?'fav-on':''}" data-act="fav" data-id="${p.id}" aria-pressed="${fav}">${ic(fav?'heartf':'heart',16)} Favorito</button>
+        </div>
+        <button class="btn block" disabled>${ic('file',16)} Solicitar adopción</button>
+        <p class="meta small">Disponible cuando hayas visitado a ${p.name}. ${note('CU-27')}</p>
+      </div>
+      <div class="panel"><span class="section-title">Tus visitas en esta protectora</span>
+        <div class="meter">${[0,1,2].map(i => `<i class="${i<used?'on':''}"></i>`).join('')}</div>
+        <p class="meta" style="margin:0">${used} de 3 visitas usadas en los últimos 3 meses ${note('CU-23')}</p></div>
+      <div class="panel"><span class="section-title">Tasa de adopción</span><b style="font-size:22px">150 €</b><p class="meta" style="margin:4px 0 0">Importe informativo ${note('RN-48')}</p></div>
+      <div class="info">${ic('chat',18)}<span>El chat con la protectora se abre cuando le envías tu primera solicitud. ${note('CU-33')}</span></div>
+    </aside>
+  </div>`};
+};
+
+V.protectora = () => {
+  const s = shelter(S.shelter), list = PETS.filter(p => p.sh === s.id && !p.status);
+  return {html:`<button class="back" data-act="backExplore">${ic('arrowL',16)} Volver a protectoras</button>
+  <div class="panel shead">${slogo(s)}
+    <div><h2>${s.name}</h2><div class="meta" style="display:flex;gap:4px;align-items:center">${ic('pin',12)} ${s.city} (${s.prov})</div>
+      <div style="margin-top:8px"><span class="badge solid">${ic('shield',12)} Validada</span></div></div></div>
+  ${note('Si la protectora te ha bloqueado, aquí verías un aviso y no sus mascotas (RN-149)', true)}
+  <div class="two">
+    <div class="panel"><span class="section-title">Sobre la protectora</span><p style="margin:0 0 8px">${s.about}</p>${sk(94)}${sk(60)}</div>
+    <div class="panel"><span class="section-title">Contacto</span>
+      <dl class="dl"><dt>Dirección</dt><dd>${s.address}</dd><dt>Teléfono</dt><dd>${s.phone}</dd><dt>Email</dt><dd>${s.email}</dd><dt>Web</dt><dd>${s.web}</dd><dt>Horario</dt><dd>${s.hours}</dd></dl></div>
+  </div>
+  <h3 class="h3">Mascotas disponibles <span class="meta">(${list.length})</span></h3>
+  <div class="grid">${list.map(p => petCard(p, {noShelter:true})).join('')}</div>`};
+};
+
+V.favoritos = () => {
+  const list = [...S.favs].map(pet);
+  return {html:`<div class="vh"><h2>Favoritos</h2><p>Texto de apoyo breve. ${note('CU-12')}</p></div>
+  <div style="height:22px"></div>
+  ${list.length ? `<div class="grid">${list.map(p => petCard(p)).join('')}</div>
+     ${note('Una mascota reservada o adoptada se queda en favoritos, pero se marca como no disponible', true)}`
+   : `<div class="empty"><div class="ph">${ic('heart',28)}</div><p>Aún no tienes favoritos.</p><button class="btn primary" data-go="explorar">Explorar mascotas</button></div>`}`};
+};
+
+function listRow(r, isVisit){
+  const p = pet(r.pet), sh = shelter(p.sh);
+  const B = {
+    chat:     `<button class="btn sm" data-go="mensajes" data-conv="${p.sh}">${ic('chat',14)} Chat</button>`,
+    cancel:   `<button class="btn sm" data-act="toast" data-msg="${isVisit?'Visita cancelada':'Solicitud de adopción cancelada'} (prototipo)">Cancelar</button>`,
+    adopt:    `<button class="btn sm primary" data-act="toast" data-msg="Aquí se abriría la solicitud de adopción (CU-27)">Solicitar adopción</button>`,
+    incident: `<button class="btn sm" data-act="toast" data-msg="Aquí se abriría una incidencia (CU-36)">Abrir incidencia</button>`
+  };
+  return `<div class="row">
+    <div class="ph" data-go="ficha" data-pet="${p.id}">${photo(p, 160)}</div>
+    <div class="r-main"><b data-go="ficha" data-pet="${p.id}">${p.name}</b><div class="sub">${sh.name}</div></div>
+    <div class="r-date"><b>${r.date}</b>${r.time?`<div class="sub">${r.time}</div>`:''}</div>
+    <div class="r-badge">${badge(r)}</div>
+    <div class="r-act">${r.hint?`<span class="sub">${r.hint}</span>`:''}${(r.acts||[]).map(a => B[a]).join('')}</div>
+  </div>`;
+}
+
+V.visitas = () => {
+  const list = VISITS.filter(v => v.tab === S.visTab);
+  const n = t => VISITS.filter(v => v.tab === t).length;
+  return {html:`<div class="vh"><h2>Visitas</h2><p>Texto de apoyo breve. ${note('CU-21')}</p></div>
+  <div class="utabs">
+    <button class="${S.visTab==='proximas'?'on':''}" data-act="visTab" data-v="proximas">Próximas <span class="n">${n('proximas')}</span></button>
+    <button class="${S.visTab==='historial'?'on':''}" data-act="visTab" data-v="historial">Historial <span class="n">${n('historial')}</span></button>
+  </div>
+  <div class="quota">
+    <div class="panel"><span class="section-title">Protectora Huellas de Valencia</span>
+      <div class="meter"><i class="on"></i><i class="on"></i><i></i></div>
+      <b>2 de 3 visitas usadas</b><span class="meta">En los últimos 3 meses · próxima plaza libre el 16 feb</span></div>
+    <div class="panel"><span class="section-title">Asociación Bigotes Libres</span>
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-top:4px">${ic('ban',20)}
+      <div><b>No puedes solicitar visitas</b><span class="meta">Tienes una visita no asistida en esta protectora ${note('RN-103')}</span></div></div></div>
+  </div>
+  <div class="rows">${list.map(r => listRow(r, true)).join('')}</div>`};
+};
+
+V.solicitudes = () => {
+  const list = ADOPTIONS.filter(a => a.tab === S.adTab);
+  const n = t => ADOPTIONS.filter(a => a.tab === t).length;
+  return {html:`<div class="vh"><h2>Solicitudes de adopción</h2><p>Texto de apoyo breve. ${note('CU-21')}</p></div>
+  <div class="utabs">
+    <button class="${S.adTab==='curso'?'on':''}" data-act="adTab" data-v="curso">En curso <span class="n">${n('curso')}</span></button>
+    <button class="${S.adTab==='historial'?'on':''}" data-act="adTab" data-v="historial">Historial <span class="n">${n('historial')}</span></button>
+  </div>
+  <div class="rows">${list.map(r => listRow(r, false)).join('')}</div>`};
+};
+
+V.mensajes = () => {
+  const c = CONVS.find(x => x.id === S.conv), sh = shelter(c.sh);
+  const m = ([type, text, time]) =>
+      type === 'date' ? `<div class="datesep">${text}</div>`
+    : type === 'sys'  ? `<div class="sys">${text}</div>`
+    : type === 'img'  ? `<div class="msg"><div class="ph"><img src="${img(text, 500)}" alt="Foto enviada por la protectora" loading="lazy"></div><small>${time}</small></div>`
+    : `<div class="msg ${type==='me'?'me':''}">${text}<small>${time}</small></div>`;
+  return {cls:'flush', after:() => { const el = app.querySelector('.msgs'); el.scrollTop = el.scrollHeight; }, html:`<div class="chat">
+    <div class="clist">
+      <div class="clist-head"><h3 style="font-size:18px">Mensajes</h3><span class="meta">Una conversación por protectora ${note('RN-133')}</span></div>
+      ${CONVS.map(x => { const s = shelter(x.sh); return `<button class="citem ${x.id===S.conv?'on':''}" data-go="mensajes" data-conv="${x.id}">
+        ${slogo(s)}
+        <div style="flex:1;min-width:0"><div class="t"><b>${s.name}</b><span class="meta small">${x.when}</span></div>
+          <div class="t"><span class="last">${x.last}</span>${x.unread?`<span class="unread">${x.unread}</span>`:''}</div></div>
+      </button>`;}).join('')}
+    </div>
+    <div class="cpane">
+      <div class="chead">${slogo(sh)}
+        <div style="flex:1;min-width:0"><b>${sh.name}</b><div class="meta small">${sh.city}</div></div>
+        <button class="btn sm" data-go="protectora" data-shelter="${sh.id}">Ver perfil</button>
+      </div>
+      <div class="ctx">${ic('info',16)}<span style="flex:1">${c.ctx}</span><span class="link" data-go="${c.ctxGo}">Ver detalle</span></div>
+      <div class="msgs">${c.msgs.map(m).join('')}</div>
+      <div class="composer">
+        <button class="iconbtn" aria-label="Adjuntar imagen" data-act="toast" data-msg="Adjuntar imagen (prototipo)">${ic('clip',18)}</button>
+        <input placeholder="Escribe un mensaje…" aria-label="Mensaje">
+        <button class="iconbtn send" aria-label="Enviar" data-act="toast" data-msg="Mensaje enviado (prototipo)">${ic('send',18)}</button>
+      </div>
+    </div>
+  </div>`};
+};
+
+function nItem(n){
+  const unread = !S.allRead && n.grp === 'Hoy';
+  return `<button class="nitem ${unread?'is-unread':''}" data-go="${n.go}">
+    <div class="ic">${ic(n.ic,18)}</div>
+    <div class="txt"><div>${n.t}</div><div class="meta small">${n.d} · ${n.when}</div></div>
+    ${unread?'<span class="ndot" aria-label="Sin leer"></span>':''}</button>`;
+}
+V.notificaciones = () => {
+  const groups = [...new Set(NOTIFS.map(n => n.grp))];
+  return {html:`<div class="vh" style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+      <div><h2>Notificaciones</h2><p>Texto de apoyo breve. ${note('CU-34')}</p></div>
+      <button class="link" data-act="readAll">Marcar todas como leídas</button></div>
+    <div style="height:22px"></div>
+    <div style="max-width:820px">${groups.map(g => `<span class="section-title">${g}</span><div class="nlist">${NOTIFS.filter(n => n.grp===g).map(nItem).join('')}</div>`).join('')}</div>`};
+};
+function popover(){
+  return `<div class="pop" role="dialog" aria-label="Notificaciones">
+    <div class="pop-head"><b>Notificaciones</b><button class="link meta" data-act="readAll">Marcar como leídas</button></div>
+    ${NOTIFS.slice(0,4).map(nItem).join('')}
+    <div class="pop-foot"><button class="link" data-go="notificaciones">Ver todas</button></div>
+  </div>`;
+}
+
+V.perfil = () => {
+  const T = [['datos','Datos personales'],['hogar','Mi hogar'],['pref','Preferencias'],['cuenta','Cuenta']];
+  const field = (l, v, cls='') => `<div class="field ${cls}"><label>${l}</label><div class="inp ${cls.includes('wide')?'tall':''}">${v}</div></div>`;
+  let body;
+  if (S.profTab === 'pref'){
+    const G = [
+      ['Especie','',['Perro','Gato'],['Perro']],
+      ['Raza','Solo se muestran las razas de las especies elegidas',['Labrador Retriever','Podenco Andaluz','Galgo Español','Mestizo / Desconocida'],[]],
+      ['Tamaño','',['Pequeño','Mediano','Grande'],['Mediano','Grande']],
+      ['Sexo','',['Macho','Hembra'],[]],
+      ['Edad','',['Cachorro','Joven','Adulto','Senior'],['Joven','Adulto']],
+      ['Nivel de actividad','',['Bajo','Medio','Alto'],[]],
+      ['Convivencia','Debe llevarse bien con…',['Niños','Perros','Gatos'],['Gatos']]
+    ];
+    body = `<p class="meta" style="margin-top:0">Todas las preguntas son opcionales y admiten varias respuestas. ${note('CU-08')}</p>
+      ${G.map(([t,d,opts,sel]) => `<div class="pref-group"><h4>${t}</h4><p>${d}</p>
+        <div class="chips"><button class="chip ${sel.length?'':'on'}" data-act="chip" data-any="1">Me da igual</button>
+        ${opts.map(o => `<button class="chip ${sel.includes(o)?'on':''}" data-act="chip">${o}</button>`).join('')}</div></div>`).join('')}
+      <div class="info" style="margin-top:18px">${ic('info',18)}<span>Al guardar cambios se borran tus descartes del modo descubrir.</span></div>
+      <div class="form-foot"><button class="btn">Cancelar</button><button class="btn primary" data-act="toast" data-msg="Preferencias guardadas (prototipo)">Guardar preferencias</button></div>`;
+  } else if (S.profTab === 'datos'){
+    body = `<div style="display:flex;gap:16px;align-items:center;margin-bottom:20px"><div class="avatar" style="width:76px;height:76px;font-size:28px">L</div><button class="btn sm">Cambiar foto</button></div>
+      <div class="form">${field('Nombre','Lucía')}${field('Apellidos','Martínez Pérez')}${field('Teléfono','600 000 005')}${field('Fecha de nacimiento','14/03/1994')}${field('Provincia','Valencia/València ▾')}${field('Ciudad','Valencia')}</div>
+      <div class="form-foot"><button class="btn primary" data-act="toast" data-msg="Datos guardados (prototipo)">Guardar</button></div>`;
+  } else if (S.profTab === 'hogar'){
+    body = `<p class="meta" style="margin-top:0">La protectora ve estos datos cuando le envías una solicitud. ${note('RN-27')}</p>
+      <div class="form">${field('Tipo de vivienda','Piso ▾')}${field('Régimen','Alquiler ▾')}${field('¿Tiene jardín?','No ▾')}${field('¿Tiene terraza?','Sí ▾')}
+      ${field('Personas en el hogar','3')}${field('¿Hay niños?','Sí ▾')}${field('Horas sola al día','4')}${field('Otros animales','Dos gatos')}
+      ${field('Experiencia previa con mascotas','He tenido perros desde pequeña.','wide')}</div>
+      <div class="form-foot"><button class="btn primary" data-act="toast" data-msg="Datos del hogar guardados (prototipo)">Guardar</button></div>`;
+  } else {
+    body = `<div class="form">${field('Email','lucia@correo.test')}${field('Contraseña','••••••••')}</div>
+      <div class="form-foot" style="justify-content:space-between"><button class="btn">Cambiar contraseña</button>
+      <button class="btn danger" data-act="toast" data-msg="Aquí se pediría confirmación (CU-07)">Eliminar mi cuenta</button></div>
+      ${note('CU-07 · Al eliminar la cuenta, los datos personales se anonimizan', true)}`;
+  }
+  return {html:`<div class="vh"><h2>Mi perfil</h2><p>Texto de apoyo breve.</p></div>
+    <div class="utabs">${T.map(([k,l]) => `<button class="${S.profTab===k?'on':''}" data-act="profTab" data-v="${k}">${l}</button>`).join('')}</div>
+    <div style="max-width:780px">${body}</div>`};
+};
+
+function modal(){
+  const p = pet(S.pet), sh = shelter(p.sh), day = DAYS[S.day];
+  return `<div class="overlay" data-act="closeBg"><div class="modal" role="dialog" aria-label="Solicitar visita">
+    <div class="modal-head"><div class="who"><div class="ph">${photo(p, 200)}</div>
+      <div><span class="section-title" style="margin-bottom:4px">Solicitar visita ${note('CU-23')}</span><h3>${p.name}</h3><div class="meta">${sh.name}</div></div></div>
+      <button class="iconbtn" data-act="close" aria-label="Cerrar">${ic('x',18)}</button></div>
+    <div class="week"><button class="iconbtn" disabled style="opacity:.4" aria-label="Semana anterior">${ic('left',16)}</button><b>Semana del 23 al 29 de noviembre</b><button class="iconbtn" data-act="toast" data-msg="Semana siguiente (prototipo)" aria-label="Semana siguiente">${ic('right',16)}</button></div>
+    <div class="days">${DAYS.map((d,i) => `<button class="day ${i===S.day?'on':''}" data-act="day" data-v="${i}" ${d.slots.length?'':'disabled'}><small>${d.d}</small><b>${d.n}</b><small>${d.slots.length?d.slots.length+' turnos':'—'}</small></button>`).join('')}</div>
+    <div class="slots">${day.slots.map(([t,f],i) => `<button class="slot ${S.slot===i?'on':''}" data-act="slot" data-v="${i}" ${f?'':'disabled'}><b>${t}</b><span class="meta">${f?`${f} ${f>1?'plazas libres':'plaza libre'}`:'Completo'}</span></button>`).join('')}</div>
+    <div class="info">${ic('info',18)}<span>Solo aparecen turnos con al menos 48 h de antelación. La protectora tiene 24 h para responder; si no lo hace, la solicitud caduca.</span></div>
+    <div class="modal-foot"><button class="btn" data-act="close">Cancelar</button><button class="btn primary" data-act="sendVisit" ${S.slot===null?'disabled':''}>Enviar solicitud</button></div>
+  </div></div>`;
+}
+
+/* =====================================================================
+   Render, navegación y gestos
+   ===================================================================== */
+const app = document.getElementById('app');
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast'); if (!t) return;
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+function render(keepScroll){
+  const prev = document.getElementById('view');
+  const top = keepScroll && prev ? prev.scrollTop : 0;
+  const v = V[S.screen]();
+  app.innerHTML = `<div class="shell">${sidebar()}<div class="main">${topbar()}
+      <div class="view ${v.cls||''}" id="view">${v.html}</div>
+      ${S.screen==='explorar' && S.tab==='mascotas' ? modeToggle() : ''}
+      <span class="credit">Fotos: Unsplash</span></div></div>
+    ${S.pop?popover():''}${S.modal?modal():''}<div class="toast" id="toast" role="status"></div>`;
+  document.getElementById('view').scrollTop = top;
+  v.after && v.after();
+}
+function go(screen, ds = {}){
+  if (ds.pet){ S.pet = +ds.pet; S.thumb = 0; }
+  if (ds.shelter) S.shelter = +ds.shelter;
+  if (ds.conv) S.conv = +ds.conv;
+  S.screen = screen; S.pop = false; S.modal = false;
+  render();
+}
+
+function bindDeck(){
+  const card = app.querySelector('.pcard.top'); if (!card) return;
+  const hl = document.getElementById('hintL'), hr = document.getElementById('hintR');
+  const sf = card.querySelector('.stamp.fav'), sd = card.querySelector('.stamp.dis');
+  let sx = 0, sy = 0, dx = 0, dy = 0, drag = false;
+  const paint = () => {
+    card.style.transform = `translate(${dx}px,${dy*.3}px) rotate(${dx/18}deg)`;
+    const k = Math.min(Math.abs(dx)/100, 1);
+    sf.style.opacity = dx > 0 ? k : 0; sd.style.opacity = dx < 0 ? k : 0;
+    hl.classList.toggle('active', dx < -40); hr.classList.toggle('active', dx > 40);
+  };
+  card.addEventListener('pointerdown', e => {
+    if (e.target.closest('button')) return;
+    drag = true; sx = e.clientX; sy = e.clientY; dx = dy = 0;
+    card.setPointerCapture(e.pointerId); card.classList.remove('wiggle'); card.style.transition = 'none'; S.wiggled = true;
+  });
+  card.addEventListener('pointermove', e => { if (!drag) return; dx = e.clientX - sx; dy = e.clientY - sy; paint(); });
+  const end = () => {
+    if (!drag) return; drag = false; card.style.transition = '';
+    if (Math.abs(dx) > 110) fly(card, Math.sign(dx));
+    else { dx = dy = 0; card.style.transform = ''; sf.style.opacity = sd.style.opacity = 0; hl.classList.remove('active'); hr.classList.remove('active'); }
+  };
+  card.addEventListener('pointerup', end); card.addEventListener('pointercancel', end);
+}
+function fly(card, dir){
+  S.wiggled = true;
+  card.classList.remove('wiggle');
+  card.querySelector(dir > 0 ? '.stamp.fav' : '.stamp.dis').style.opacity = 1;
+  const h = document.getElementById(dir > 0 ? 'hintR' : 'hintL'); h && h.classList.add('active');
+  card.style.transform = `translate(${dir*720}px,40px) rotate(${dir*28}deg)`; card.style.opacity = 0;
+  setTimeout(() => {
+    const id = S.deck.shift(), p = pet(id);
+    if (dir > 0) S.favs.add(id);
+    render();
+    toast(dir > 0 ? `Has añadido a ${p.name} a favoritos` : `Has descartado a ${p.name} durante 30 días`);
+  }, 300);
+}
+function swipe(dir){ const card = app.querySelector('.pcard.top'); if (card) fly(card, dir); }
+
+const ACT = {
+  pop:      () => { S.pop = !S.pop; render(true); },
+  tab:      t  => { S.tab = t.dataset.v; render(); },
+  mode:     t  => { S.mode = t.dataset.v; render(); },
+  fav:      t  => { const id = +t.dataset.id, p = pet(id);
+                    if (S.favs.has(id)) { S.favs.delete(id); render(true); toast(`Has quitado a ${p.name} de favoritos`); }
+                    else { S.favs.add(id); render(true); toast(`Has añadido a ${p.name} a favoritos`); } },
+  swipe:    t  => swipe(+t.dataset.dir),
+  resetDeck:() => { S.deck = available().map(p => p.id); render(); },
+  backExplore:()=> { S.screen = 'explorar'; S.tab = 'protectoras'; render(); },
+  thumb:    t  => { S.thumb = +t.dataset.v; render(true); },
+  visit:    () => { S.modal = true; S.day = 0; S.slot = null; render(true); },
+  close:    () => { S.modal = false; render(true); },
+  closeBg:  (t, e) => { if (e.target === t) ACT.close(); },
+  day:      t  => { S.day = +t.dataset.v; S.slot = null; render(true); },
+  slot:     t  => { S.slot = +t.dataset.v; render(true); },
+  sendVisit:() => { S.modal = false; render(true); toast('Solicitud enviada · la protectora tiene 24 h para responder'); },
+  visTab:   t  => { S.visTab = t.dataset.v; render(); },
+  adTab:    t  => { S.adTab = t.dataset.v; render(); },
+  profTab:  t  => { S.profTab = t.dataset.v; render(); },
+  readAll:  () => { S.allRead = true; render(true); },
+  toast:    t  => toast(t.dataset.msg),
+  chip:     t  => {
+    const g = t.closest('.chips'), any = g.querySelector('[data-any]');
+    if (t.dataset.any) g.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === t));
+    else { t.classList.toggle('on'); any.classList.remove('on'); if (!g.querySelector('.chip.on')) any.classList.add('on'); }
+  }
+};
+
+app.addEventListener('click', e => {
+  const t = e.target.closest('[data-go],[data-act]');
+  if (S.pop && !e.target.closest('.pop') && !(t && t.dataset.act === 'pop')){
+    S.pop = false;
+    if (!t){ render(true); return; }
+  }
+  if (!t || t.disabled) return;
+  if (t.dataset.act) ACT[t.dataset.act] && ACT[t.dataset.act](t, e);
+  else go(t.dataset.go, t.dataset);
+});
+app.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.matches('[data-go]:not(button)')) e.target.click();
+});
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input,textarea')) return;
+  if (e.key === 'Escape' && (S.modal || S.pop)){ S.modal = false; S.pop = false; render(true); }
+  if (e.key === 'n' || e.key === 'N') document.body.classList.toggle('notes');   // notas didácticas
+  if (S.screen === 'explorar' && S.tab === 'mascotas' && S.mode === 'descubrir' && !S.modal){
+    if (e.key === 'ArrowLeft') swipe(-1);
+    if (e.key === 'ArrowRight') swipe(1);
+  }
+});
+
+render();
+</script>
+</body>
+</html>

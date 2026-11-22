@@ -1,0 +1,10 @@
+{
+  // Compilación del servidor a dist/ (`npm run build`). Sin tests.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src/server", "src/shared"]
+}

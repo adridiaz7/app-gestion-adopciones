@@ -22,3 +22,9 @@ __pycache__/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Informes de cobertura de tests (vitest --coverage)
+coverage/
+
+# Claude Code: configuración personal (la compartida es .claude/settings.json)
+.claude/settings.local.json
