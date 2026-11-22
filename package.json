@@ -12,7 +12,7 @@
     "build": "tsc -p tsconfig.server.json",
     "start": "node --env-file=.env dist/server/server.js",
     "test": "vitest run",
-    "test:unit": "vitest run tests/unit",
+    "test:unit": "vitest run --project unit",
     "test:watch": "vitest",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint ."
