@@ -83,10 +83,55 @@ El código, el JSON y las URLs de negocio están en **español**, siguiendo el p
 - La conversión desde los nombres de la BD (`birth_date`, `id_shelter`) se hace en el **modelo**. Así la API no depende del esquema: renombrar una columna no rompe el frontend.
 - Los tipos de cada respuesta se definen en `src/shared/`, de modo que cliente y servidor comparten el mismo contrato.
 
+### Errores
+
+Todas las respuestas de error tienen la misma forma:
+
+```json
+{
+  "error": {
+    "codigo": "MASCOTA_NO_DISPONIBLE",
+    "mensaje": "La mascota no está disponible para visitas"
+  }
+}
+```
+
+- `codigo`: constante en `MAYUSCULAS_CON_GUIONES`, pensada para el programa. El frontend decide qué hacer según el código, no según el texto.
+- `mensaje`: texto en español, pensado para la persona; se puede mostrar en pantalla.
+
+**El dominio no conoce HTTP.** Una misma regla se usa desde una petición web, desde un test unitario o desde una tarea programada, donde no hay HTTP. Por eso los errores de negocio se clasifican por **categoría** y un único middleware traduce la categoría a un código HTTP:
+
+| Categoría (clase base del dominio) | HTTP | Cuándo |
+|---|---|---|
+| `ErrorDeValidacion` | 400 | Los datos no tienen el formato correcto |
+| `NoAutenticado` | 401 | Hace falta iniciar sesión |
+| `Prohibido` | 403 | Hay sesión, pero no hay permiso |
+| `NoEncontrado` | 404 | El recurso no existe |
+| `Conflicto` | 409 | Choca con el estado actual (mascota reservada, email repetido…) |
+
+- Cada error concreto hereda de una categoría y define su `codigo` (`class MascotaNoDisponible extends Conflicto`). Al crear un error nuevo no hay que tocar el middleware.
+- Cualquier otro error (un fallo de SQL, un error de programación) se responde con **500** y un mensaje genérico. El detalle interno nunca se envía al cliente.
+
 ### Pendiente de decidir
 
-- Formato del cuerpo de los errores y correspondencia entre errores de negocio y códigos HTTP.
-- Validación de los datos de entrada (manual o con librería).
+- Validación del formato de los datos de entrada (manual o con librería). Se decidirá al implementar el registro, el primer endpoint que recibe datos; la opción preferida es Zod. Las reglas de negocio (mayoría de edad, email repetido…) no forman parte de esta decisión: siempre se comprueban en el dominio o en el modelo.
+
+---
+
+## Tests
+
+- **Unitarios** (`tests/unit/`): dominio puro, sin Express ni base de datos, con un Reloj falso.
+- **Integración** (`tests/integration/`): todo lo que pasa por Express o PostgreSQL, contra una base de datos propia de los tests.
+
+### Base de datos de los tests
+
+Los tests nunca usan la base de datos de desarrollo: usan `adopciones_test`, configurada en `.env.test`.
+
+1. **Al empezar `npm test`**, una sola vez (`globalSetup` de Vitest): se borra y se vuelve a crear `adopciones_test`, y se cargan `schema.sql` y `seed.sql` (los catálogos).
+2. **Antes de cada test**: `TRUNCATE` de las tablas que rellenan los tests. Los catálogos se conservan.
+3. Los tests de integración se ejecutan **en serie**, porque comparten la misma base de datos.
+
+Así cada test empieza con la base de datos en un estado conocido y no depende del orden ni de lo que dejaron los demás. Se descartó envolver cada test en una transacción con `ROLLBACK`: es más rápido, pero obliga a pasar la misma conexión a todo el código y a usar `SAVEPOINT` cuando el código abre su propia transacción. Con el tamaño de este proyecto, la diferencia de velocidad no compensa esa complejidad.
 
 ---
 

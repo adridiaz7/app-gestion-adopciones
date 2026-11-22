@@ -49,8 +49,7 @@ No las resuelvas por tu cuenta: consulta antes. Cuando se decida una, pasa a `do
 - **Subida y almacenamiento de imágenes** (fotos de mascotas, logos, avatares, imagen del chat).
 - **Tareas programadas** (CU-45…48).
 - **Zona horaria de los turnos.**
-- **BD temporal para los tests:** creación, limpieza y aislamiento entre tests.
-- **Errores HTTP y validación:** formato del cuerpo de error, correspondencia error de negocio → código HTTP, y validación de entrada (manual o con librería).
+- **Validación del formato de entrada** (manual o con librería): se decide al llegar al registro; la opción preferida es Zod.
 
 ## Documentación de referencia
 
