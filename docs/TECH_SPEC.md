@@ -110,7 +110,8 @@ Todas las respuestas de error tienen la misma forma:
 | `Conflicto` | 409 | Choca con el estado actual (mascota reservada, email repetido…) |
 
 - Cada error concreto hereda de una categoría y define su `codigo` (`class MascotaNoDisponible extends Conflicto`). Al crear un error nuevo no hay que tocar el middleware.
-- Cualquier otro error (un fallo de SQL, un error de programación) se responde con **500** y un mensaje genérico. El detalle interno nunca se envía al cliente.
+- Cualquier otro error (un fallo de SQL, un error de programación) se responde con **500**, código `ERROR_INTERNO` y un mensaje genérico. El detalle interno nunca se envía al cliente: se registra en la consola del servidor.
+- Una ruta de `/api` que no existe responde **404** con código `RUTA_NO_ENCONTRADA` (no es el `NoEncontrado` de negocio: aquí no existe la URL, allí no existe el recurso).
 
 ### Pendiente de decidir
 

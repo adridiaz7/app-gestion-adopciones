@@ -2,7 +2,7 @@
 
 Plataforma web de adopción de mascotas que maneja solicitudes, visitas y adopciones.
 
-Estado actual: **andamiaje del backend listo**. Hay reglas de negocio, casos de uso, base de datos PostgreSQL, mockups y especificación técnica. El backend solo tiene `GET /api/health` y la carga de configuración (`src/server/app.ts`, `server.ts` y `config/`, con sus tests). Todavía no hay funcionalidades de negocio ni frontend.
+Estado actual: **primera funcionalidad lista**. Hay reglas de negocio, casos de uso, base de datos PostgreSQL, mockups y especificación técnica. El backend tiene `GET /api/health`, el catálogo `GET /api/provincias`, el middleware de errores (solo 500 por ahora), el pool de `pg` y la BD de tests (`adopciones_test`, recreada en cada `npm test`). Todavía no hay autenticación ni frontend.
 
 ## Comandos
 
