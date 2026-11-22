@@ -9,7 +9,7 @@ Estado actual: **primera funcionalidad lista**. Hay reglas de negocio, casos de 
 Entorno: Windows, con PowerShell y Git Bash.
 
 - Instalar: npm install
-- Tests: npm test (todos) · npm run test:unit (solo unitarios) · npm run test:watch
+- Tests: npm test (todos) · npm run test:unit (solo unitarios) · npm run test:auth (solo auth) · npm run test:watch
 - Comprobar tipos: npm run typecheck
 - Lint: npm run lint
 - Desarrollo: npm run dev (tsx watch; necesita un `.env`, copia de `.env.example`)
@@ -43,7 +43,7 @@ Las decisiones de fondo (BD de los tests, por qué no se usa ROLLBACK…) están
 - **`console.error`:** en los tests que provocan errores, se espía y se silencia con `vi.spyOn(console, 'error').mockImplementation(() => undefined)`, y se restaura con `vi.restoreAllMocks()` en `afterEach`.
 - **Listas:** comprueba que el elemento existe antes de usar su posición (`indexOf` devuelve -1 si no está), y verifica el orden sobre la lista entera, no solo sobre un par de vecinos.
 
-## Forma de trabajar (acordada con el usuario)
+## Forma de trabajar
 
 - **Consultar antes de tomar cualquier decisión** (tecnología, diseño, nombres, alcance). Plantea las opciones con una recomendación argumentada y espera la respuesta.
 - No cambies contraseñas ni la configuración de seguridad de PostgreSQL. Para probar el esquema, usa una base de datos o un clúster temporal.
@@ -57,18 +57,17 @@ Las decisiones de fondo (BD de los tests, por qué no se usa ROLLBACK…) están
 
 No las resuelvas por tu cuenta: consulta antes. Cuando se decida una, pasa a `docs/TECH_SPEC.md` y se borra de aquí.
 
-- **Autenticación.**
-- **Envío de emails** (CU-03 verificar email, CU-05 recuperar contraseña).
+- **Envío de emails** (CU-03 verificar email, CU-05 recuperar contraseña). Mientras tanto, la interfaz `EnviadorEmail` escribe el enlace en la consola.
 - **Subida y almacenamiento de imágenes** (fotos de mascotas, logos, avatares, imagen del chat).
 - **Tareas programadas** (CU-45…48).
 - **Zona horaria de los turnos.**
-- **Validación del formato de entrada** (manual o con librería): se decide al llegar al registro; la opción preferida es Zod.
 
 ## Documentación de referencia
 
-- `docs/reglas-de-negocio.md`: reglas numeradas `RN-01…RN-174`. **Los identificadores están congelados**: una regla nueva recibe el siguiente número libre aunque se coloque en otra sección, y una regla eliminada no libera su número.
+- `docs/reglas-de-negocio.md`: reglas numeradas `RN-01…RN-179`. **Los identificadores están congelados**: una regla nueva recibe el siguiente número libre aunque se coloque en otra sección, y una regla eliminada no libera su número.
 - `docs/casos-de-uso.md`: casos de uso `CU-01…CU-48`. Están completos y guían el desarrollo de cada funcionalidad.
-- `docs/TECH_SPEC.md`: stack, herramientas, arquitectura, convenciones de la API y resumen del esquema.
+- `docs/TECH_SPEC.md`: stack, herramientas, arquitectura, convenciones de la API, autenticación y resumen del esquema.
+- `.claude/agents/autenticador.md`: reglas no negociables de auth, endpoints y tests obligatorios. Lo vigila `scripts/check-auth.sh` (hooks `Stop` y `SubagentStop`).
 - `database/README.md`: puesta en marcha, seeds, dump, usuarios de desarrollo y **glosario español ↔ inglés** de tablas, estados y enums.
 - `docs/ux-ui/`: diseños de referencia en PNG (`acceso/`, `app-adoptante/`, `landing.png`) y `design-system.md`.
 - `docs/mockups/prototipo-paleta-1.html`: prototipo navegable del adoptante. Es HTML autocontenido: los tokens de color están en `:root` y las pantallas se pintan con un `render()` de JS vanilla.
@@ -84,6 +83,7 @@ Se organiza **por capa**, sin agrupar por funcionalidad. Las carpetas se crean c
 │   ├── server/            Backend (Express + pg)
 │   │   ├── app.ts         Crea y configura Express, sin listen (los tests la importan)
 │   │   ├── server.ts      Arranca el servidor (listen)
+│   │   ├── auth/          Utilidades de auth: hash de contraseñas, tokens y cookie
 │   │   ├── config/        Único sitio que lee process.env; valida y tipa la configuración
 │   │   ├── db/            Pool de pg y helper de transacción (hace SET LOCAL app.current_user_id)
 │   │   ├── domain/        Reglas puras: errores propios e interfaz Reloj. Sin SQL ni Express

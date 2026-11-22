@@ -4,7 +4,7 @@
 > Cada regla tiene un identificador (`RN-XX`) para poder referenciarla desde el código, las pruebas y el resto de la documentación.
 > La numeración es secuencial. **A partir del inicio del desarrollo, los identificadores se congelan**: una regla nueva recibirá el siguiente número libre aunque se coloque dentro de su sección, y una regla eliminada no libera su número. Así nunca cambia el número de una regla ya citada en el código o en las pruebas.
 >
-> **Última actualización:** 18/11/2026
+> **Última actualización:** 22/11/2026
 
 ---
 
@@ -48,9 +48,19 @@
 | RN-05 | El Administrador no tiene perfil propio: es un usuario con `rol = ADMIN`. |
 | RN-06 | El email de acceso es único en toda la plataforma. |
 | RN-07 | El email debe verificarse tras el registro. Hasta que se verifica, la cuenta no está activa. |
-| RN-08 | La contraseña nunca se guarda en texto plano en un entorno real. *(Su implementación con hash se definirá en la fase de login.)* |
+| RN-08 | La contraseña nunca se guarda en texto plano: se guarda su hash con **Argon2id**. |
 | RN-09 | Cada protectora tiene **una única cuenta** de usuario, compartida por todo su personal (propietario y voluntarios). |
 | RN-10 | Un usuario suspendido por el administrador no puede iniciar sesión mientras la suspensión esté activa (ver [RN-154](#13-administrador)). |
+
+### Acceso y sesiones
+
+| ID | Regla |
+|---|---|
+| RN-175 | La contraseña tiene entre **12 y 256 caracteres**, sin reglas de composición (no se exigen mayúsculas, números ni símbolos). |
+| RN-176 | Una sesión dura **30 días deslizantes**: si se usa cuando le quedan menos de 15 días, se renueva otros 30. |
+| RN-177 | El enlace de verificación de email caduca a las **24 horas**. |
+| RN-178 | El enlace para restablecer la contraseña caduca a los **30 minutos** y solo se puede usar **una vez**. |
+| RN-179 | Se permiten como máximo **10 intentos de inicio de sesión cada 15 minutos** desde una misma IP. |
 
 ### Eliminación de cuenta
 
@@ -429,6 +439,11 @@ Estos valores no se escriben fijos en el código: van en la **configuración del
 | Plazo máximo para completar una adopción aprobada | 5 días | RN-128 |
 | Duración de un descarte | 30 días | RN-75 |
 | Número máximo de fotos por mascota | 6 | RN-50 |
+| Duración de una sesión (deslizante) | 30 días | RN-176 |
+| Margen para renovar una sesión | 15 días | RN-176 |
+| Validez del enlace de verificación de email | 24 h | RN-177 |
+| Validez del enlace para restablecer la contraseña | 30 min | RN-178 |
+| Intentos de inicio de sesión por IP | 10 cada 15 min | RN-179 |
 
 ---
 
@@ -450,5 +465,4 @@ Estos valores no se escriben fijos en el código: van en la **configuración del
 - Modelado de las imágenes del chat (RN-139).
 - Bloqueo del turno al reservar la última plaza, para evitar que dos adoptantes la ocupen a la vez.
 - Zona horaria: fechas guardadas con zona horaria (`timestamptz`) y hora de España como referencia.
-- Hash de contraseñas y gestión de los enlaces de verificación de email (fase de login).
 - Decisiones técnicas de PostgreSQL: implementación de los ENUM, tipos de datos, convenciones de nombres y comportamiento al borrar (`ON DELETE`).

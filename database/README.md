@@ -87,6 +87,8 @@ Si no se fija (procesos automáticos), `audit_log.id_user` queda a `NULL`, lo qu
 | Adoptante | `adopter` |
 | Protectora | `shelter` |
 | Suspensión | `suspension` |
+| Sesión | `session` |
+| Enlace de un solo uso (verificar email, restablecer contraseña) | `auth_token` |
 | Provincia | `province` |
 | Especie | `species` |
 | Raza | `breed` |
@@ -124,6 +126,8 @@ Si no se fija (procesos automáticos), `audit_log.id_user` queda a `NULL`, lo qu
 |---|---|
 | Motivo de baja: fallecimiento · traslado · tratamiento · acogida · error · otro · retirada por el administrador | `DECEASED` · `TRANSFERRED` · `MEDICAL_TREATMENT` · `FOSTER_CARE` · `ERROR` · `OTHER` · `REMOVED_BY_ADMIN` |
 | Motivo de anulación: mascota reservada · adoptante bloqueado · adoptante suspendido · no asistida · turno cancelado · cuenta eliminada | `PET_RESERVED` · `ADOPTER_BLOCKED` · `ADOPTER_SUSPENDED` · `NO_SHOW` · `SLOT_CANCELLED` · `ACCOUNT_DELETED` (más los motivos de baja) |
+| Uso del enlace: verificar email · restablecer contraseña | `EMAIL_VERIFICATION` · `PASSWORD_RESET` |
+| Hash del token (SHA-256) · caducidad · usado | `token_hash` · `expires_at` · `used_at` |
 | Convivencia: sí · no · desconocido | `YES` · `NO` · `UNKNOWN` |
 | Tamaño: pequeño · mediano · grande | `SMALL` · `MEDIUM` · `LARGE` |
 | Franja de edad: cachorro · joven · adulto · senior | `BABY` · `YOUNG` · `ADULT` · `SENIOR` |

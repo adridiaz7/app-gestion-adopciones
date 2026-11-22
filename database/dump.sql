@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict LxjEzDhxYbEjg0ztmBXGoG3EJetCqtq4BaB1ueT1BFyS8pas0O8Ywt75kQSrM7d
+\restrict JXk7Ur98szUvX6V0SGQ1SqzK4HT1g3WPX42EsTmEnuNHb1rftSfJuPUc6JRkxx5
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -66,6 +66,16 @@ CREATE TYPE public.audit_operation AS ENUM (
     'INSERT',
     'UPDATE',
     'DELETE'
+);
+
+
+--
+-- Name: auth_token_purpose; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.auth_token_purpose AS ENUM (
+    'EMAIL_VERIFICATION',
+    'PASSWORD_RESET'
 );
 
 
@@ -587,6 +597,37 @@ ALTER TABLE public.audit_log ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
+-- Name: auth_token; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.auth_token (
+    id integer NOT NULL,
+    id_user integer NOT NULL,
+    purpose public.auth_token_purpose NOT NULL,
+    token_hash character(64) NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    used_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT chk_auth_token_token_hash CHECK ((token_hash ~ '^[0-9a-f]{64}$'::text))
+);
+
+
+--
+-- Name: auth_token_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.auth_token ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.auth_token_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: breed; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -926,6 +967,35 @@ CREATE TABLE public.province (
 
 
 --
+-- Name: session; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.session (
+    id integer NOT NULL,
+    id_user integer NOT NULL,
+    token_hash character(64) NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT chk_session_token_hash CHECK ((token_hash ~ '^[0-9a-f]{64}$'::text))
+);
+
+
+--
+-- Name: session_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.session ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.session_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: shelter; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1109,14 +1179,14 @@ ALTER TABLE public.visit_slot ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 --
 
 COPY public.adopter (id, id_user, first_name, last_name, phone, birth_date, id_province, city, profile_photo_url, housing_type, has_garden, has_terrace, housing_tenure, household_members, has_children, other_pets, previous_experience, hours_alone_per_day, created_at, updated_at) FROM stdin;
-1	5	Lucía	Martínez Soler	600000001	1988-04-12	46	Valencia	/uploads/adopters/1.jpg	HOUSE	t	f	OWNED	4	t	Una gata de 6 años, esterilizada.	He tenido perros toda la vida.	4	2026-08-21 02:15:32.768865+02	2026-08-22 02:15:32.768865+02
-2	6	Javier	López Ferrer	600000002	1992-09-30	46	Paterna	\N	FLAT	f	t	RENTED	2	f	\N	Primera vez que adopto.	6	2026-09-20 02:15:32.768865+02	2026-09-21 02:15:32.768865+02
-3	7	Marta	Sánchez Vidal	600000003	1985-01-22	46	Burjassot	\N	DETACHED_HOUSE	t	t	OWNED	3	t	\N	Fui casa de acogida de dos podencos.	3	2026-10-05 02:15:32.768865+02	2026-10-06 02:15:32.768865+02
-4	8	Pablo	Romero Gil	600000004	1979-06-03	28	Getafe	\N	FLAT	f	f	OWNED	1	f	\N	Tuve un beagle durante 12 años.	8	2026-10-10 02:15:32.768865+02	2026-10-11 02:15:32.768865+02
-5	9	Elena	Navarro Pons	600000005	1995-11-15	46	Valencia	\N	FLAT	f	t	RENTED	2	f	\N	\N	5	2026-10-20 02:15:32.768865+02	2026-10-21 02:15:32.768865+02
-6	10	Sergio	Gil Andrés	600000006	1990-02-08	46	Mislata	\N	HOUSE	t	f	OWNED	2	f	Un perro mestizo.	Siempre he tenido perros.	6	2026-08-31 02:15:32.768865+02	2026-09-01 02:15:32.768865+02
-7	11	Carmen	Ruiz Blasco	600000007	1968-07-19	28	Madrid	\N	FLAT	f	t	OWNED	2	f	\N	He tenido gatos.	4	2026-09-10 02:15:32.768865+02	2026-09-11 02:15:32.768865+02
-8	12	Diego	Torres Mena	600000008	2001-03-27	50	Zaragoza	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-11-19 01:15:32.768865+01	2026-11-19 01:15:32.768865+01
+1	5	Lucía	Martínez Soler	600000001	1988-04-12	46	Valencia	/uploads/adopters/1.jpg	HOUSE	t	f	OWNED	4	t	Una gata de 6 años, esterilizada.	He tenido perros toda la vida.	4	2026-08-24 23:55:54.435199+02	2026-08-25 23:55:54.435199+02
+2	6	Javier	López Ferrer	600000002	1992-09-30	46	Paterna	\N	FLAT	f	t	RENTED	2	f	\N	Primera vez que adopto.	6	2026-09-23 23:55:54.435199+02	2026-09-24 23:55:54.435199+02
+3	7	Marta	Sánchez Vidal	600000003	1985-01-22	46	Burjassot	\N	DETACHED_HOUSE	t	t	OWNED	3	t	\N	Fui casa de acogida de dos podencos.	3	2026-10-08 23:55:54.435199+02	2026-10-09 23:55:54.435199+02
+4	8	Pablo	Romero Gil	600000004	1979-06-03	28	Getafe	\N	FLAT	f	f	OWNED	1	f	\N	Tuve un beagle durante 12 años.	8	2026-10-13 23:55:54.435199+02	2026-10-14 23:55:54.435199+02
+5	9	Elena	Navarro Pons	600000005	1995-11-15	46	Valencia	\N	FLAT	f	t	RENTED	2	f	\N	\N	5	2026-10-23 23:55:54.435199+02	2026-10-24 23:55:54.435199+02
+6	10	Sergio	Gil Andrés	600000006	1990-02-08	46	Mislata	\N	HOUSE	t	f	OWNED	2	f	Un perro mestizo.	Siempre he tenido perros.	6	2026-09-03 23:55:54.435199+02	2026-09-04 23:55:54.435199+02
+7	11	Carmen	Ruiz Blasco	600000007	1968-07-19	28	Madrid	\N	FLAT	f	t	OWNED	2	f	\N	He tenido gatos.	4	2026-09-13 23:55:54.435199+02	2026-09-14 23:55:54.435199+02
+8	12	Diego	Torres Mena	600000008	2001-03-27	50	Zaragoza	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-11-22 22:55:54.435199+01	2026-11-22 22:55:54.435199+01
 \.
 
 
@@ -1125,8 +1195,8 @@ COPY public.adopter (id, id_user, first_name, last_name, phone, birth_date, id_p
 --
 
 COPY public.adopter_block (id, id_shelter, id_adopter, reason, details, unblocked_at, created_at, updated_at, created_by, updated_by) FROM stdin;
-1	1	6	INAPPROPRIATE_BEHAVIOR	Mensajes ofensivos a una voluntaria.	\N	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01	2	2
-2	2	5	OTHER	Bloqueo por error.	2026-10-31 02:15:32.768865+01	2026-10-30 02:15:32.768865+01	2026-10-31 02:15:32.768865+01	3	3
+1	1	6	INAPPROPRIATE_BEHAVIOR	Mensajes ofensivos a una voluntaria.	\N	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01	2	2
+2	2	5	OTHER	Bloqueo por error.	2026-11-03 23:55:54.435199+01	2026-11-02 23:55:54.435199+01	2026-11-03 23:55:54.435199+01	3	3
 \.
 
 
@@ -1135,13 +1205,13 @@ COPY public.adopter_block (id, id_shelter, id_adopter, reason, details, unblocke
 --
 
 COPY public.adopter_preference (id, id_adopter, requires_children_compatibility, created_at, updated_at) FROM stdin;
-1	1	t	2026-08-21 02:15:32.768865+02	2026-10-20 02:15:32.768865+02
-2	2	f	2026-09-20 02:15:32.768865+02	2026-09-20 02:15:32.768865+02
-3	3	t	2026-10-05 02:15:32.768865+02	2026-10-05 02:15:32.768865+02
-4	4	f	2026-10-10 02:15:32.768865+02	2026-10-10 02:15:32.768865+02
-5	5	f	2026-10-20 02:15:32.768865+02	2026-10-20 02:15:32.768865+02
-6	6	f	2026-08-31 02:15:32.768865+02	2026-08-31 02:15:32.768865+02
-7	7	f	2026-09-10 02:15:32.768865+02	2026-09-10 02:15:32.768865+02
+1	1	t	2026-08-24 23:55:54.435199+02	2026-10-23 23:55:54.435199+02
+2	2	f	2026-09-23 23:55:54.435199+02	2026-09-23 23:55:54.435199+02
+3	3	t	2026-10-08 23:55:54.435199+02	2026-10-08 23:55:54.435199+02
+4	4	f	2026-10-13 23:55:54.435199+02	2026-10-13 23:55:54.435199+02
+5	5	f	2026-10-23 23:55:54.435199+02	2026-10-23 23:55:54.435199+02
+6	6	f	2026-09-03 23:55:54.435199+02	2026-09-03 23:55:54.435199+02
+7	7	f	2026-09-13 23:55:54.435199+02	2026-09-13 23:55:54.435199+02
 \.
 
 
@@ -1150,13 +1220,13 @@ COPY public.adopter_preference (id, id_adopter, requires_children_compatibility,
 --
 
 COPY public.adoption (id, id_adopter, id_pet, id_visit, status, responded_at, rejection_reason, cancelled_at, cancelled_by, cancellation_reason, void_reason, handed_over_at, returned_at, return_reason, created_at, updated_at, created_by, updated_by) FROM stdin;
-1	1	1	1	COMPLETED	2026-10-25 02:15:32.768865+01	\N	\N	\N	\N	\N	2026-10-29 02:15:32.768865+01	\N	\N	2026-10-23 02:15:32.768865+02	2026-10-29 02:15:32.768865+01	5	2
-2	2	2	2	APPROVED	2026-11-17 02:15:32.768865+01	\N	\N	\N	\N	\N	\N	\N	\N	2026-11-12 02:15:32.768865+01	2026-11-17 02:15:32.768865+01	6	2
-3	3	2	3	NOT_SELECTED	2026-11-17 02:15:32.768865+01	\N	\N	\N	\N	\N	\N	\N	\N	2026-11-13 02:15:32.768865+01	2026-11-17 02:15:32.768865+01	7	2
-4	3	3	4	PENDING	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-11-15 02:15:32.768865+01	2026-11-15 02:15:32.768865+01	7	\N
-5	4	3	5	PENDING	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	8	\N
-6	7	13	15	RETURNED	2026-10-15 02:15:32.768865+02	\N	\N	\N	\N	\N	2026-10-17 02:15:32.768865+02	2026-11-14 02:15:32.768865+01	Alergia de un miembro de la familia.	2026-10-13 02:15:32.768865+02	2026-11-14 02:15:32.768865+01	11	3
-7	4	20	21	CANCELLED	\N	\N	2026-11-19 00:15:32.768865+01	ADOPTER	Me han ofrecido acoger al perro de un familiar.	\N	\N	\N	\N	2026-11-18 14:15:32.768865+01	2026-11-19 00:15:32.768865+01	8	8
+1	1	1	1	COMPLETED	2026-10-28 23:55:54.435199+01	\N	\N	\N	\N	\N	2026-11-01 23:55:54.435199+01	\N	\N	2026-10-26 23:55:54.435199+01	2026-11-01 23:55:54.435199+01	5	2
+2	2	2	2	APPROVED	2026-11-20 23:55:54.435199+01	\N	\N	\N	\N	\N	\N	\N	\N	2026-11-15 23:55:54.435199+01	2026-11-20 23:55:54.435199+01	6	2
+3	3	2	3	NOT_SELECTED	2026-11-20 23:55:54.435199+01	\N	\N	\N	\N	\N	\N	\N	\N	2026-11-16 23:55:54.435199+01	2026-11-20 23:55:54.435199+01	7	2
+4	3	3	4	PENDING	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-11-18 23:55:54.435199+01	2026-11-18 23:55:54.435199+01	7	\N
+5	4	3	5	PENDING	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	8	\N
+6	7	13	15	RETURNED	2026-10-18 23:55:54.435199+02	\N	\N	\N	\N	\N	2026-10-20 23:55:54.435199+02	2026-11-17 23:55:54.435199+01	Alergia de un miembro de la familia.	2026-10-16 23:55:54.435199+02	2026-11-17 23:55:54.435199+01	11	3
+7	4	20	21	CANCELLED	\N	\N	2026-11-22 21:55:54.435199+01	ADOPTER	Me han ofrecido acoger al perro de un familiar.	\N	\N	\N	\N	2026-11-22 11:55:54.435199+01	2026-11-22 21:55:54.435199+01	8	8
 \.
 
 
@@ -1165,18 +1235,18 @@ COPY public.adoption (id, id_adopter, id_pet, id_visit, status, responded_at, re
 --
 
 COPY public.app_user (id, email, password, role, email_verified, deleted_at, created_at, updated_at) FROM stdin;
-1	admin@adopciones.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADMIN	t	\N	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-2	huellas@protectora.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	SHELTER	t	\N	2026-07-22 02:15:32.768865+02	2026-07-22 02:15:32.768865+02
-3	bigotes@protectora.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	SHELTER	t	\N	2026-06-22 02:15:32.768865+02	2026-06-22 02:15:32.768865+02
-4	patas@protectora.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	SHELTER	t	\N	2026-11-14 02:15:32.768865+01	2026-11-14 02:15:32.768865+01
-5	lucia.martinez@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-08-21 02:15:32.768865+02	2026-08-21 02:15:32.768865+02
-6	javier.lopez@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-09-20 02:15:32.768865+02	2026-09-20 02:15:32.768865+02
-7	marta.sanchez@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-10-05 02:15:32.768865+02	2026-10-05 02:15:32.768865+02
-8	pablo.romero@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-10-10 02:15:32.768865+02	2026-10-10 02:15:32.768865+02
-9	elena.navarro@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-10-20 02:15:32.768865+02	2026-10-20 02:15:32.768865+02
-10	sergio.gil@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-08-31 02:15:32.768865+02	2026-08-31 02:15:32.768865+02
-11	carmen.ruiz@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-09-10 02:15:32.768865+02	2026-09-10 02:15:32.768865+02
-12	diego.torres@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	f	\N	2026-11-19 01:15:32.768865+01	2026-11-19 01:15:32.768865+01
+1	admin@adopciones.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADMIN	t	\N	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+2	huellas@protectora.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	SHELTER	t	\N	2026-07-25 23:55:54.435199+02	2026-07-25 23:55:54.435199+02
+3	bigotes@protectora.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	SHELTER	t	\N	2026-06-25 23:55:54.435199+02	2026-06-25 23:55:54.435199+02
+4	patas@protectora.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	SHELTER	t	\N	2026-11-17 23:55:54.435199+01	2026-11-17 23:55:54.435199+01
+5	lucia.martinez@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-08-24 23:55:54.435199+02	2026-08-24 23:55:54.435199+02
+6	javier.lopez@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-09-23 23:55:54.435199+02	2026-09-23 23:55:54.435199+02
+7	marta.sanchez@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-10-08 23:55:54.435199+02	2026-10-08 23:55:54.435199+02
+8	pablo.romero@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-10-13 23:55:54.435199+02	2026-10-13 23:55:54.435199+02
+9	elena.navarro@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-10-23 23:55:54.435199+02	2026-10-23 23:55:54.435199+02
+10	sergio.gil@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-09-03 23:55:54.435199+02	2026-09-03 23:55:54.435199+02
+11	carmen.ruiz@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	t	\N	2026-09-13 23:55:54.435199+02	2026-09-13 23:55:54.435199+02
+12	diego.torres@correo.test	$2a$10$2Dq0w6NRTOID2G1xporNUO2ZG2e3qYOzHmDdzmwk89UymFC5YUJAi	ADOPTER	f	\N	2026-11-22 22:55:54.435199+01	2026-11-22 22:55:54.435199+01
 \.
 
 
@@ -1185,7 +1255,15 @@ COPY public.app_user (id, email, password, role, email_verified, deleted_at, cre
 --
 
 COPY public.audit_log (id, id_user, table_name, id_record, operation, old_data, new_data, logged_at) FROM stdin;
-1	\N	app_user	1	INSERT	\N	{"id": 1, "role": "ADMIN", "email": "admin@adopciones.test", "created_at": "2026-11-19T02:15:32.651419+01:00", "deleted_at": null, "updated_at": "2026-11-19T02:15:32.651419+01:00", "email_verified": true}	2026-11-19 02:15:32.651419+01
+1	\N	app_user	1	INSERT	\N	{"id": 1, "role": "ADMIN", "email": "admin@adopciones.test", "created_at": "2026-11-22T23:55:54.337977+01:00", "deleted_at": null, "updated_at": "2026-11-22T23:55:54.337977+01:00", "email_verified": true}	2026-11-22 23:55:54.337977+01
+\.
+
+
+--
+-- Data for Name: auth_token; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.auth_token (id, id_user, purpose, token_hash, expires_at, used_at, created_at, updated_at) FROM stdin;
 \.
 
 
@@ -1194,39 +1272,39 @@ COPY public.audit_log (id, id_user, table_name, id_record, operation, old_data, 
 --
 
 COPY public.breed (id, id_species, name, created_at, updated_at) FROM stdin;
-1	1	Mestizo / Desconocida	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-2	1	Labrador Retriever	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-3	1	Golden Retriever	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-4	1	Pastor Alemán	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-5	1	Pastor Belga Malinois	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-6	1	Podenco Andaluz	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-7	1	Podenco Ibicenco	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-8	1	Galgo Español	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-9	1	Bodeguero Andaluz	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-10	1	Mastín Español	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-11	1	Border Collie	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-12	1	Beagle	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-13	1	Bóxer	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-14	1	American Staffordshire Terrier	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-15	1	Pit Bull Terrier	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-16	1	Yorkshire Terrier	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-17	1	Chihuahua	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-18	1	Teckel	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-19	1	Caniche	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-20	1	Bulldog Francés	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-21	1	Husky Siberiano	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-22	1	Setter Inglés	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-23	2	Mestizo / Desconocida	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-24	2	Común Europeo	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-25	2	Siamés	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-26	2	Persa	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-27	2	Maine Coon	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-28	2	Británico de Pelo Corto	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-29	2	Bengalí	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-30	2	Ragdoll	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-31	2	Azul Ruso	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-32	2	Angora Turco	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-33	2	Sphynx	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
+1	1	Mestizo / Desconocida	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+2	1	Labrador Retriever	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+3	1	Golden Retriever	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+4	1	Pastor Alemán	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+5	1	Pastor Belga Malinois	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+6	1	Podenco Andaluz	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+7	1	Podenco Ibicenco	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+8	1	Galgo Español	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+9	1	Bodeguero Andaluz	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+10	1	Mastín Español	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+11	1	Border Collie	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+12	1	Beagle	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+13	1	Bóxer	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+14	1	American Staffordshire Terrier	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+15	1	Pit Bull Terrier	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+16	1	Yorkshire Terrier	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+17	1	Chihuahua	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+18	1	Teckel	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+19	1	Caniche	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+20	1	Bulldog Francés	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+21	1	Husky Siberiano	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+22	1	Setter Inglés	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+23	2	Mestizo / Desconocida	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+24	2	Común Europeo	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+25	2	Siamés	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+26	2	Persa	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+27	2	Maine Coon	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+28	2	Británico de Pelo Corto	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+29	2	Bengalí	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+30	2	Ragdoll	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+31	2	Azul Ruso	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+32	2	Angora Turco	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+33	2	Sphynx	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
 \.
 
 
@@ -1235,17 +1313,17 @@ COPY public.breed (id, id_species, name, created_at, updated_at) FROM stdin;
 --
 
 COPY public.conversation (id, id_adopter, id_shelter, last_message_at, created_at, updated_at) FROM stdin;
-1	1	1	2026-10-30 02:15:32.768865+01	2026-10-16 02:15:32.768865+02	2026-10-30 02:15:32.768865+01
-2	2	1	2026-11-17 02:15:32.768865+01	2026-11-05 02:15:32.768865+01	2026-11-17 02:15:32.768865+01
-3	3	1	2026-11-14 02:15:32.768865+01	2026-11-06 02:15:32.768865+01	2026-11-14 02:15:32.768865+01
-4	6	1	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01
-5	7	2	2026-11-14 02:15:32.768865+01	2026-10-06 02:15:32.768865+02	2026-11-14 02:15:32.768865+01
-6	2	2	2026-11-18 06:15:32.768865+01	2026-11-13 02:15:32.768865+01	2026-11-18 06:15:32.768865+01
-7	4	1	\N	2026-11-11 02:15:32.768865+01	2026-11-11 02:15:32.768865+01
-8	5	1	\N	2026-11-09 02:15:32.768865+01	2026-11-09 02:15:32.768865+01
-9	5	2	\N	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01
-10	3	2	\N	2026-11-18 21:15:32.768865+01	2026-11-18 21:15:32.768865+01
-11	4	2	\N	2026-11-12 02:15:32.768865+01	2026-11-12 02:15:32.768865+01
+1	1	1	2026-11-02 23:55:54.435199+01	2026-10-19 23:55:54.435199+02	2026-11-02 23:55:54.435199+01
+2	2	1	2026-11-20 23:55:54.435199+01	2026-11-08 23:55:54.435199+01	2026-11-20 23:55:54.435199+01
+3	3	1	2026-11-17 23:55:54.435199+01	2026-11-09 23:55:54.435199+01	2026-11-17 23:55:54.435199+01
+4	6	1	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01
+5	7	2	2026-11-17 23:55:54.435199+01	2026-10-09 23:55:54.435199+02	2026-11-17 23:55:54.435199+01
+6	2	2	2026-11-22 03:55:54.435199+01	2026-11-16 23:55:54.435199+01	2026-11-22 03:55:54.435199+01
+7	4	1	\N	2026-11-14 23:55:54.435199+01	2026-11-14 23:55:54.435199+01
+8	5	1	\N	2026-11-12 23:55:54.435199+01	2026-11-12 23:55:54.435199+01
+9	5	2	\N	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01
+10	3	2	\N	2026-11-22 18:55:54.435199+01	2026-11-22 18:55:54.435199+01
+11	4	2	\N	2026-11-15 23:55:54.435199+01	2026-11-15 23:55:54.435199+01
 \.
 
 
@@ -1254,9 +1332,9 @@ COPY public.conversation (id, id_adopter, id_shelter, last_message_at, created_a
 --
 
 COPY public.incident (id, id_adopter, id_shelter, opened_by, id_visit, id_adoption, reason, details, status, resolved_at, resolution, created_at, updated_at, created_by, updated_by) FROM stdin;
-1	4	2	ADOPTER	21	\N	INCORRECT_ATTENDANCE	Me marcaron como no asistido, pero estuve allí; tengo fotos con Canela.	RESOLVED	2026-11-18 02:15:32.768865+01	Confirmado con la protectora: la visita se realizó. Asistencia corregida.	2026-11-17 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	8	1
-2	6	1	ADOPTER	\N	\N	UNFAIR_BLOCK	Creo que me han bloqueado sin motivo.	OPEN	\N	\N	2026-11-14 02:15:32.768865+01	2026-11-14 02:15:32.768865+01	10	\N
-3	5	2	SHELTER	17	\N	INAPPROPRIATE_BEHAVIOR	La adoptante respondió con insultos por chat cuando cancelamos su visita.	IN_REVIEW	\N	\N	2026-11-18 02:15:32.768865+01	2026-11-18 14:15:32.768865+01	3	1
+1	4	2	ADOPTER	21	\N	INCORRECT_ATTENDANCE	Me marcaron como no asistido, pero estuve allí; tengo fotos con Canela.	RESOLVED	2026-11-21 23:55:54.435199+01	Confirmado con la protectora: la visita se realizó. Asistencia corregida.	2026-11-20 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	8	1
+2	6	1	ADOPTER	\N	\N	UNFAIR_BLOCK	Creo que me han bloqueado sin motivo.	OPEN	\N	\N	2026-11-17 23:55:54.435199+01	2026-11-17 23:55:54.435199+01	10	\N
+3	5	2	SHELTER	17	\N	INAPPROPRIATE_BEHAVIOR	La adoptante respondió con insultos por chat cuando cancelamos su visita.	IN_REVIEW	\N	\N	2026-11-21 23:55:54.435199+01	2026-11-22 11:55:54.435199+01	3	1
 \.
 
 
@@ -1265,20 +1343,20 @@ COPY public.incident (id, id_adopter, id_shelter, opened_by, id_visit, id_adopti
 --
 
 COPY public.message (id, id_conversation, sender, body, image_url, read_at, created_at, updated_at) FROM stdin;
-1	1	ADOPTER	¡Hola! Me encantó Toby en la visita. ¿Qué necesito para adoptarle?	\N	2026-10-23 02:15:32.768865+02	2026-10-23 02:15:32.768865+02	2026-10-23 02:15:32.768865+02
-2	1	SHELTER	¡Hola, Lucía! Solo tienes que enviar la solicitud desde su ficha.	\N	2026-10-23 02:15:32.768865+02	2026-10-23 02:15:32.768865+02	2026-10-23 02:15:32.768865+02
-3	1	ADOPTER	¡Toby ya está en casa y se lleva genial con mi gata!	/uploads/chat/1-1.jpg	2026-10-31 02:15:32.768865+01	2026-10-30 02:15:32.768865+01	2026-10-30 02:15:32.768865+01
-4	2	ADOPTER	¿Luna se lleva bien con gatos?	\N	2026-11-06 02:15:32.768865+01	2026-11-06 02:15:32.768865+01	2026-11-06 02:15:32.768865+01
-5	2	SHELTER	Sí, convive con dos gatos aquí en la protectora.	\N	2026-11-06 02:15:32.768865+01	2026-11-06 02:15:32.768865+01	2026-11-06 02:15:32.768865+01
-6	2	SHELTER	¡Enhorabuena, Javier! ¿Qué día te viene bien para recoger a Luna?	\N	\N	2026-11-17 02:15:32.768865+01	2026-11-17 02:15:32.768865+01
-7	3	ADOPTER	¿Rocky podría acompañarme a correr por las mañanas?	\N	2026-11-14 02:15:32.768865+01	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01
-8	3	SHELTER	¡Le encantaría! Tiene muchísima energía.	\N	\N	2026-11-14 02:15:32.768865+01	2026-11-14 02:15:32.768865+01
-9	4	ADOPTER	¿Puedo llevar a mi perro a la visita de Max?	\N	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01
-10	5	ADOPTER	Michi se está adaptando muy bien.	\N	2026-10-20 02:15:32.768865+02	2026-10-20 02:15:32.768865+02	2026-10-20 02:15:32.768865+02
-11	5	ADOPTER	Lo siento muchísimo: tengo que devolver a Michi por una alergia en casa.	\N	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01
-12	5	SHELTER	Lo entendemos, Carmen. Gracias por avisarnos con tiempo.	\N	2026-11-14 02:15:32.768865+01	2026-11-14 02:15:32.768865+01	2026-11-14 02:15:32.768865+01
-13	6	SHELTER	Hemos cambiado el horario del turno del jueves; por favor, elige otro turno.	\N	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01
-14	6	ADOPTER	Hecho, ya he elegido el del viernes. ¡Gracias!	\N	\N	2026-11-18 06:15:32.768865+01	2026-11-18 06:15:32.768865+01
+1	1	ADOPTER	¡Hola! Me encantó Toby en la visita. ¿Qué necesito para adoptarle?	\N	2026-10-26 23:55:54.435199+01	2026-10-26 23:55:54.435199+01	2026-10-26 23:55:54.435199+01
+2	1	SHELTER	¡Hola, Lucía! Solo tienes que enviar la solicitud desde su ficha.	\N	2026-10-26 23:55:54.435199+01	2026-10-26 23:55:54.435199+01	2026-10-26 23:55:54.435199+01
+3	1	ADOPTER	¡Toby ya está en casa y se lleva genial con mi gata!	/uploads/chat/1-1.jpg	2026-11-03 23:55:54.435199+01	2026-11-02 23:55:54.435199+01	2026-11-02 23:55:54.435199+01
+4	2	ADOPTER	¿Luna se lleva bien con gatos?	\N	2026-11-09 23:55:54.435199+01	2026-11-09 23:55:54.435199+01	2026-11-09 23:55:54.435199+01
+5	2	SHELTER	Sí, convive con dos gatos aquí en la protectora.	\N	2026-11-09 23:55:54.435199+01	2026-11-09 23:55:54.435199+01	2026-11-09 23:55:54.435199+01
+6	2	SHELTER	¡Enhorabuena, Javier! ¿Qué día te viene bien para recoger a Luna?	\N	\N	2026-11-20 23:55:54.435199+01	2026-11-20 23:55:54.435199+01
+7	3	ADOPTER	¿Rocky podría acompañarme a correr por las mañanas?	\N	2026-11-17 23:55:54.435199+01	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01
+8	3	SHELTER	¡Le encantaría! Tiene muchísima energía.	\N	\N	2026-11-17 23:55:54.435199+01	2026-11-17 23:55:54.435199+01
+9	4	ADOPTER	¿Puedo llevar a mi perro a la visita de Max?	\N	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01
+10	5	ADOPTER	Michi se está adaptando muy bien.	\N	2026-10-23 23:55:54.435199+02	2026-10-23 23:55:54.435199+02	2026-10-23 23:55:54.435199+02
+11	5	ADOPTER	Lo siento muchísimo: tengo que devolver a Michi por una alergia en casa.	\N	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01
+12	5	SHELTER	Lo entendemos, Carmen. Gracias por avisarnos con tiempo.	\N	2026-11-17 23:55:54.435199+01	2026-11-17 23:55:54.435199+01	2026-11-17 23:55:54.435199+01
+13	6	SHELTER	Hemos cambiado el horario del turno del jueves; por favor, elige otro turno.	\N	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01
+14	6	ADOPTER	Hecho, ya he elegido el del viernes. ¡Gracias!	\N	\N	2026-11-22 03:55:54.435199+01	2026-11-22 03:55:54.435199+01
 \.
 
 
@@ -1287,23 +1365,23 @@ COPY public.message (id, id_conversation, sender, body, image_url, read_at, crea
 --
 
 COPY public.notification (id, id_user, type, body, read_at, id_visit, id_adoption, id_incident, created_at, updated_at) FROM stdin;
-1	5	ADOPTION_APPROVED	¡Enhorabuena! Has sido elegida para adoptar a Toby.	2026-10-25 02:15:32.768865+01	\N	1	\N	2026-10-25 02:15:32.768865+01	2026-10-25 02:15:32.768865+01
-2	5	VISIT_CONFIRMED	Tu visita para conocer a Kira está confirmada.	2026-11-15 02:15:32.768865+01	9	\N	\N	2026-11-15 02:15:32.768865+01	2026-11-15 02:15:32.768865+01
-3	5	VISIT_VOIDED	Thor necesita un tratamiento veterinario y no está disponible por ahora. Te avisaremos si vuelve a estarlo.	\N	14	\N	\N	2026-11-17 02:15:32.768865+01	2026-11-17 02:15:32.768865+01
-4	6	ADOPTION_APPROVED	¡Enhorabuena! Has sido elegido para adoptar a Luna.	\N	\N	2	\N	2026-11-17 02:15:32.768865+01	2026-11-17 02:15:32.768865+01
-5	6	VISIT_EXPIRED	La protectora no respondió a tiempo a tu solicitud para conocer a Bruno.	\N	11	\N	\N	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01
-6	6	VISIT_VOIDED	La protectora ha cambiado el turno de tu visita a Nube. Elige otro turno.	2026-11-18 02:15:32.768865+01	19	\N	\N	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01
-7	6	VISIT_CONFIRMED	Tu visita para conocer a Nube está confirmada.	\N	20	\N	\N	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01
-8	7	VISIT_REJECTED	La protectora no ha podido confirmar tu visita para conocer a Kira.	2026-11-15 02:15:32.768865+01	12	\N	\N	2026-11-15 02:15:32.768865+01	2026-11-15 02:15:32.768865+01
-9	7	ADOPTION_NOT_SELECTED	Luna ya ha encontrado un hogar. ¡Gracias por tu interés!	\N	\N	3	\N	2026-11-17 02:15:32.768865+01	2026-11-17 02:15:32.768865+01
-10	8	INCIDENT_RESOLVED	Tu incidencia sobre la visita a Canela se ha resuelto.	\N	\N	\N	1	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01
-11	9	VISIT_VOIDED	Tu visita para conocer a Coco se ha anulado.	2026-11-13 02:15:32.768865+01	7	\N	\N	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01
-12	9	VISIT_CANCELLED	La protectora ha cancelado tu visita para conocer a Oliver.	\N	17	\N	\N	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01
-13	10	ADOPTER_BLOCKED	La protectora Huellas de Valencia ha restringido tu acceso a sus mascotas.	2026-11-13 02:15:32.768865+01	\N	\N	\N	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01
-14	10	VISIT_VOIDED	Tu visita para conocer a Max se ha anulado.	2026-11-13 02:15:32.768865+01	8	\N	\N	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01
-15	11	VISIT_CONFIRMED	Tu visita para conocer a Garfield está confirmada.	2026-11-14 02:15:32.768865+01	16	\N	\N	2026-11-14 02:15:32.768865+01	2026-11-14 02:15:32.768865+01
-16	2	ADOPTION_PENDING_REMINDER	Tienes solicitudes de adopción de Rocky pendientes de respuesta.	\N	\N	4	\N	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01
-17	2	HANDOVER_PENDING_REMINDER	Recuerda registrar la entrega de Luna cuando se vaya con Javier.	\N	\N	2	\N	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01
+1	5	ADOPTION_APPROVED	¡Enhorabuena! Has sido elegida para adoptar a Toby.	2026-10-28 23:55:54.435199+01	\N	1	\N	2026-10-28 23:55:54.435199+01	2026-10-28 23:55:54.435199+01
+2	5	VISIT_CONFIRMED	Tu visita para conocer a Kira está confirmada.	2026-11-18 23:55:54.435199+01	9	\N	\N	2026-11-18 23:55:54.435199+01	2026-11-18 23:55:54.435199+01
+3	5	VISIT_VOIDED	Thor necesita un tratamiento veterinario y no está disponible por ahora. Te avisaremos si vuelve a estarlo.	\N	14	\N	\N	2026-11-20 23:55:54.435199+01	2026-11-20 23:55:54.435199+01
+4	6	ADOPTION_APPROVED	¡Enhorabuena! Has sido elegido para adoptar a Luna.	\N	\N	2	\N	2026-11-20 23:55:54.435199+01	2026-11-20 23:55:54.435199+01
+5	6	VISIT_EXPIRED	La protectora no respondió a tiempo a tu solicitud para conocer a Bruno.	\N	11	\N	\N	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01
+6	6	VISIT_VOIDED	La protectora ha cambiado el turno de tu visita a Nube. Elige otro turno.	2026-11-21 23:55:54.435199+01	19	\N	\N	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01
+7	6	VISIT_CONFIRMED	Tu visita para conocer a Nube está confirmada.	\N	20	\N	\N	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01
+8	7	VISIT_REJECTED	La protectora no ha podido confirmar tu visita para conocer a Kira.	2026-11-18 23:55:54.435199+01	12	\N	\N	2026-11-18 23:55:54.435199+01	2026-11-18 23:55:54.435199+01
+9	7	ADOPTION_NOT_SELECTED	Luna ya ha encontrado un hogar. ¡Gracias por tu interés!	\N	\N	3	\N	2026-11-20 23:55:54.435199+01	2026-11-20 23:55:54.435199+01
+10	8	INCIDENT_RESOLVED	Tu incidencia sobre la visita a Canela se ha resuelto.	\N	\N	\N	1	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01
+11	9	VISIT_VOIDED	Tu visita para conocer a Coco se ha anulado.	2026-11-16 23:55:54.435199+01	7	\N	\N	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01
+12	9	VISIT_CANCELLED	La protectora ha cancelado tu visita para conocer a Oliver.	\N	17	\N	\N	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01
+13	10	ADOPTER_BLOCKED	La protectora Huellas de Valencia ha restringido tu acceso a sus mascotas.	2026-11-16 23:55:54.435199+01	\N	\N	\N	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01
+14	10	VISIT_VOIDED	Tu visita para conocer a Max se ha anulado.	2026-11-16 23:55:54.435199+01	8	\N	\N	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01
+15	11	VISIT_CONFIRMED	Tu visita para conocer a Garfield está confirmada.	2026-11-17 23:55:54.435199+01	16	\N	\N	2026-11-17 23:55:54.435199+01	2026-11-17 23:55:54.435199+01
+16	2	ADOPTION_PENDING_REMINDER	Tienes solicitudes de adopción de Rocky pendientes de respuesta.	\N	\N	4	\N	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01
+17	2	HANDOVER_PENDING_REMINDER	Recuerda registrar la entrega de Luna cuando se vaya con Javier.	\N	\N	2	\N	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01
 \.
 
 
@@ -1312,31 +1390,31 @@ COPY public.notification (id, id_user, type, body, read_at, id_visit, id_adoptio
 --
 
 COPY public.pet (id, id_shelter, id_breed, name, sex, size, approx_birth_date, activity_level, children_compatibility, description, vaccinated, dewormed, neutered, microchipped, special_needs, adoption_fee, status, withdrawn_at, withdrawal_reason, created_at, updated_at, created_by, updated_by) FROM stdin;
-1	1	2	Toby	MALE	LARGE	2022-11-19	HIGH	YES	Labrador cariñoso y juguetón. Adoptado.	t	t	t	t	\N	150.00	ADOPTED	\N	\N	2026-09-20 02:15:32.768865+02	2026-10-29 02:15:32.768865+01	2	2
-2	1	1	Luna	FEMALE	MEDIUM	2024-11-19	MEDIUM	YES	Mestiza muy sociable con personas y animales.	t	t	t	t	\N	150.00	RESERVED	\N	\N	2026-10-05 02:15:32.768865+02	2026-11-17 02:15:32.768865+01	2	2
-3	1	6	Rocky	MALE	MEDIUM	2023-11-19	HIGH	UNKNOWN	Podenco rescatado de una rehala. Necesita correr cada día.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-10-10 02:15:32.768865+02	2026-10-10 02:15:32.768865+02	2	2
-4	1	8	Nala	FEMALE	LARGE	2021-11-19	LOW	YES	Galga tranquila, ideal para un hogar sosegado.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-10-15 02:15:32.768865+02	2026-10-15 02:15:32.768865+02	2	2
-5	1	9	Coco	MALE	SMALL	2025-11-19	HIGH	YES	Bodeguero joven con mucha energía.	t	t	f	t	\N	120.00	AVAILABLE	\N	\N	2026-10-20 02:15:32.768865+02	2026-10-20 02:15:32.768865+02	2	2
-6	1	4	Max	MALE	LARGE	2020-11-19	MEDIUM	NO	Pastor alemán protector; mejor sin niños pequeños ni otros animales.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-10-22 02:15:32.768865+02	2026-10-22 02:15:32.768865+02	2	2
-7	1	11	Kira	FEMALE	MEDIUM	2024-11-19	HIGH	YES	Border collie muy lista; le encanta aprender trucos.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-10-25 02:15:32.768865+01	2026-10-25 02:15:32.768865+01	2	2
-8	1	10	Thor	MALE	LARGE	2019-11-19	LOW	YES	Mastín noble y tranquilo.	t	t	t	t	Displasia de cadera en tratamiento.	150.00	WITHDRAWN	2026-11-17 02:15:32.768865+01	MEDICAL_TREATMENT	2026-10-28 02:15:32.768865+01	2026-11-17 02:15:32.768865+01	2	2
-9	1	16	Lola	FEMALE	SMALL	2017-11-19	LOW	UNKNOWN	Yorkshire senior que busca un sofá donde descansar.	t	t	t	t	Necesita pienso renal.	80.00	AVAILABLE	\N	\N	2026-10-30 02:15:32.768865+01	2026-10-30 02:15:32.768865+01	2	2
-10	1	14	Bruno	MALE	MEDIUM	2022-11-19	MEDIUM	YES	Amstaff bonachón, muy apegado a las personas.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-11-01 02:15:32.768865+01	2026-11-01 02:15:32.768865+01	2	2
-11	1	24	Misi	FEMALE	SMALL	2023-11-19	LOW	YES	Gata tranquila que convive con perros.	t	t	t	t	\N	60.00	AVAILABLE	\N	\N	2026-11-04 02:15:32.768865+01	2026-11-04 02:15:32.768865+01	2	2
-12	1	23	Simba	MALE	SMALL	2026-07-19	HIGH	UNKNOWN	Gatito de cuatro meses, curioso y juguetón.	t	t	f	f	\N	\N	AVAILABLE	\N	\N	2026-11-12 02:15:32.768865+01	2026-11-12 02:15:32.768865+01	2	2
-13	2	24	Michi	MALE	SMALL	2024-11-19	MEDIUM	YES	Volvió a la asociación tras una adopción que no salió bien.	t	t	t	t	\N	80.00	AVAILABLE	\N	\N	2026-09-10 02:15:32.768865+02	2026-11-14 02:15:32.768865+01	3	3
-14	2	26	Garfield	MALE	MEDIUM	2018-11-19	LOW	YES	Persa dormilón y muy mimoso.	t	t	t	t	Cepillado diario.	80.00	AVAILABLE	\N	\N	2026-09-30 02:15:32.768865+02	2026-09-30 02:15:32.768865+02	3	3
-15	2	23	Salem	MALE	SMALL	2025-11-19	HIGH	UNKNOWN	Gato negro rescatado de una colonia.	t	t	t	t	\N	80.00	AVAILABLE	\N	\N	2026-10-20 02:15:32.768865+02	2026-10-20 02:15:32.768865+02	3	3
-16	2	32	Nube	FEMALE	SMALL	2023-11-19	LOW	YES	Angora blanca, tímida al principio.	t	t	t	t	\N	80.00	AVAILABLE	\N	\N	2026-10-24 02:15:32.768865+02	2026-10-24 02:15:32.768865+02	3	3
-17	2	29	Tigre	MALE	MEDIUM	2024-11-19	HIGH	NO	Bengalí muy activo; mejor como único gato.	t	t	t	t	\N	100.00	AVAILABLE	\N	\N	2026-10-28 02:15:32.768865+01	2026-10-28 02:15:32.768865+01	3	3
-18	2	30	Pelusa	FEMALE	MEDIUM	2021-11-19	LOW	YES	Ragdoll muy dócil.	t	t	t	t	\N	80.00	WITHDRAWN	2026-11-13 02:15:32.768865+01	FOSTER_CARE	2026-10-10 02:15:32.768865+02	2026-11-13 02:15:32.768865+01	3	3
-19	2	25	Oliver	MALE	SMALL	2020-11-19	MEDIUM	YES	Siamés hablador y sociable.	t	t	t	t	\N	80.00	AVAILABLE	\N	\N	2026-11-07 02:15:32.768865+01	2026-11-07 02:15:32.768865+01	3	3
-20	2	12	Canela	FEMALE	MEDIUM	2023-11-19	HIGH	YES	Beagle rescatada de un laboratorio.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-10-30 02:15:32.768865+01	2026-10-30 02:15:32.768865+01	3	3
-21	2	17	Chispa	FEMALE	SMALL	2016-11-19	LOW	NO	Chihuahua senior que busca un hogar tranquilo sin niños.	t	t	t	t	\N	50.00	AVAILABLE	\N	\N	2026-11-09 02:15:32.768865+01	2026-11-09 02:15:32.768865+01	3	3
-22	3	1	Duque	MALE	LARGE	2023-11-19	MEDIUM	UNKNOWN	Mestizo grande y tranquilo.	t	f	f	t	\N	\N	AVAILABLE	\N	\N	2026-11-15 02:15:32.768865+01	2026-11-15 02:15:32.768865+01	4	4
-23	3	23	Perla	FEMALE	SMALL	2024-11-19	LOW	UNKNOWN	Gata rescatada en la calle.	t	f	t	f	\N	\N	AVAILABLE	\N	\N	2026-11-15 02:15:32.768865+01	2026-11-15 02:15:32.768865+01	4	4
-24	3	8	Rayo	MALE	LARGE	2022-11-19	LOW	YES	Galgo recuperado tras la temporada de caza.	t	t	t	t	\N	\N	AVAILABLE	\N	\N	2026-11-16 02:15:32.768865+01	2026-11-16 02:15:32.768865+01	4	4
-25	3	24	Mora	FEMALE	SMALL	2025-11-19	MEDIUM	UNKNOWN	Gata joven y cariñosa.	t	f	f	f	\N	\N	AVAILABLE	\N	\N	2026-11-16 02:15:32.768865+01	2026-11-16 02:15:32.768865+01	4	4
+1	1	2	Toby	MALE	LARGE	2022-11-22	HIGH	YES	Labrador cariñoso y juguetón. Adoptado.	t	t	t	t	\N	150.00	ADOPTED	\N	\N	2026-09-23 23:55:54.435199+02	2026-11-01 23:55:54.435199+01	2	2
+2	1	1	Luna	FEMALE	MEDIUM	2024-11-22	MEDIUM	YES	Mestiza muy sociable con personas y animales.	t	t	t	t	\N	150.00	RESERVED	\N	\N	2026-10-08 23:55:54.435199+02	2026-11-20 23:55:54.435199+01	2	2
+3	1	6	Rocky	MALE	MEDIUM	2023-11-22	HIGH	UNKNOWN	Podenco rescatado de una rehala. Necesita correr cada día.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-10-13 23:55:54.435199+02	2026-10-13 23:55:54.435199+02	2	2
+4	1	8	Nala	FEMALE	LARGE	2021-11-22	LOW	YES	Galga tranquila, ideal para un hogar sosegado.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-10-18 23:55:54.435199+02	2026-10-18 23:55:54.435199+02	2	2
+5	1	9	Coco	MALE	SMALL	2025-11-22	HIGH	YES	Bodeguero joven con mucha energía.	t	t	f	t	\N	120.00	AVAILABLE	\N	\N	2026-10-23 23:55:54.435199+02	2026-10-23 23:55:54.435199+02	2	2
+6	1	4	Max	MALE	LARGE	2020-11-22	MEDIUM	NO	Pastor alemán protector; mejor sin niños pequeños ni otros animales.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-10-25 23:55:54.435199+01	2026-10-25 23:55:54.435199+01	2	2
+7	1	11	Kira	FEMALE	MEDIUM	2024-11-22	HIGH	YES	Border collie muy lista; le encanta aprender trucos.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-10-28 23:55:54.435199+01	2026-10-28 23:55:54.435199+01	2	2
+8	1	10	Thor	MALE	LARGE	2019-11-22	LOW	YES	Mastín noble y tranquilo.	t	t	t	t	Displasia de cadera en tratamiento.	150.00	WITHDRAWN	2026-11-20 23:55:54.435199+01	MEDICAL_TREATMENT	2026-10-31 23:55:54.435199+01	2026-11-20 23:55:54.435199+01	2	2
+9	1	16	Lola	FEMALE	SMALL	2017-11-22	LOW	UNKNOWN	Yorkshire senior que busca un sofá donde descansar.	t	t	t	t	Necesita pienso renal.	80.00	AVAILABLE	\N	\N	2026-11-02 23:55:54.435199+01	2026-11-02 23:55:54.435199+01	2	2
+10	1	14	Bruno	MALE	MEDIUM	2022-11-22	MEDIUM	YES	Amstaff bonachón, muy apegado a las personas.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-11-04 23:55:54.435199+01	2026-11-04 23:55:54.435199+01	2	2
+11	1	24	Misi	FEMALE	SMALL	2023-11-22	LOW	YES	Gata tranquila que convive con perros.	t	t	t	t	\N	60.00	AVAILABLE	\N	\N	2026-11-07 23:55:54.435199+01	2026-11-07 23:55:54.435199+01	2	2
+12	1	23	Simba	MALE	SMALL	2026-07-22	HIGH	UNKNOWN	Gatito de cuatro meses, curioso y juguetón.	t	t	f	f	\N	\N	AVAILABLE	\N	\N	2026-11-15 23:55:54.435199+01	2026-11-15 23:55:54.435199+01	2	2
+13	2	24	Michi	MALE	SMALL	2024-11-22	MEDIUM	YES	Volvió a la asociación tras una adopción que no salió bien.	t	t	t	t	\N	80.00	AVAILABLE	\N	\N	2026-09-13 23:55:54.435199+02	2026-11-17 23:55:54.435199+01	3	3
+14	2	26	Garfield	MALE	MEDIUM	2018-11-22	LOW	YES	Persa dormilón y muy mimoso.	t	t	t	t	Cepillado diario.	80.00	AVAILABLE	\N	\N	2026-10-03 23:55:54.435199+02	2026-10-03 23:55:54.435199+02	3	3
+15	2	23	Salem	MALE	SMALL	2025-11-22	HIGH	UNKNOWN	Gato negro rescatado de una colonia.	t	t	t	t	\N	80.00	AVAILABLE	\N	\N	2026-10-23 23:55:54.435199+02	2026-10-23 23:55:54.435199+02	3	3
+16	2	32	Nube	FEMALE	SMALL	2023-11-22	LOW	YES	Angora blanca, tímida al principio.	t	t	t	t	\N	80.00	AVAILABLE	\N	\N	2026-10-27 23:55:54.435199+01	2026-10-27 23:55:54.435199+01	3	3
+17	2	29	Tigre	MALE	MEDIUM	2024-11-22	HIGH	NO	Bengalí muy activo; mejor como único gato.	t	t	t	t	\N	100.00	AVAILABLE	\N	\N	2026-10-31 23:55:54.435199+01	2026-10-31 23:55:54.435199+01	3	3
+18	2	30	Pelusa	FEMALE	MEDIUM	2021-11-22	LOW	YES	Ragdoll muy dócil.	t	t	t	t	\N	80.00	WITHDRAWN	2026-11-16 23:55:54.435199+01	FOSTER_CARE	2026-10-13 23:55:54.435199+02	2026-11-16 23:55:54.435199+01	3	3
+19	2	25	Oliver	MALE	SMALL	2020-11-22	MEDIUM	YES	Siamés hablador y sociable.	t	t	t	t	\N	80.00	AVAILABLE	\N	\N	2026-11-10 23:55:54.435199+01	2026-11-10 23:55:54.435199+01	3	3
+20	2	12	Canela	FEMALE	MEDIUM	2023-11-22	HIGH	YES	Beagle rescatada de un laboratorio.	t	t	t	t	\N	150.00	AVAILABLE	\N	\N	2026-11-02 23:55:54.435199+01	2026-11-02 23:55:54.435199+01	3	3
+21	2	17	Chispa	FEMALE	SMALL	2016-11-22	LOW	NO	Chihuahua senior que busca un hogar tranquilo sin niños.	t	t	t	t	\N	50.00	AVAILABLE	\N	\N	2026-11-12 23:55:54.435199+01	2026-11-12 23:55:54.435199+01	3	3
+22	3	1	Duque	MALE	LARGE	2023-11-22	MEDIUM	UNKNOWN	Mestizo grande y tranquilo.	t	f	f	t	\N	\N	AVAILABLE	\N	\N	2026-11-18 23:55:54.435199+01	2026-11-18 23:55:54.435199+01	4	4
+23	3	23	Perla	FEMALE	SMALL	2024-11-22	LOW	UNKNOWN	Gata rescatada en la calle.	t	f	t	f	\N	\N	AVAILABLE	\N	\N	2026-11-18 23:55:54.435199+01	2026-11-18 23:55:54.435199+01	4	4
+24	3	8	Rayo	MALE	LARGE	2022-11-22	LOW	YES	Galgo recuperado tras la temporada de caza.	t	t	t	t	\N	\N	AVAILABLE	\N	\N	2026-11-19 23:55:54.435199+01	2026-11-19 23:55:54.435199+01	4	4
+25	3	24	Mora	FEMALE	SMALL	2025-11-22	MEDIUM	UNKNOWN	Gata joven y cariñosa.	t	f	f	f	\N	\N	AVAILABLE	\N	\N	2026-11-19 23:55:54.435199+01	2026-11-19 23:55:54.435199+01	4	4
 \.
 
 
@@ -1375,41 +1453,41 @@ COPY public.pet_compatibility_rel (id_pet, id_species, result) FROM stdin;
 --
 
 COPY public.pet_photo (id, id_pet, url, display_order, created_at, updated_at) FROM stdin;
-1	1	/uploads/pets/1-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-2	1	/uploads/pets/1-2.jpg	2	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-3	2	/uploads/pets/2-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-4	2	/uploads/pets/2-2.jpg	2	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-5	2	/uploads/pets/2-3.jpg	3	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-6	3	/uploads/pets/3-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-7	3	/uploads/pets/3-2.jpg	2	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-8	4	/uploads/pets/4-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-9	5	/uploads/pets/5-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-10	5	/uploads/pets/5-2.jpg	2	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-11	6	/uploads/pets/6-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-12	7	/uploads/pets/7-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-13	7	/uploads/pets/7-2.jpg	2	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-14	7	/uploads/pets/7-3.jpg	3	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-15	8	/uploads/pets/8-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-16	9	/uploads/pets/9-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-17	10	/uploads/pets/10-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-18	11	/uploads/pets/11-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-19	12	/uploads/pets/12-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-20	12	/uploads/pets/12-2.jpg	2	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-21	13	/uploads/pets/13-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-22	14	/uploads/pets/14-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-23	14	/uploads/pets/14-2.jpg	2	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-24	15	/uploads/pets/15-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-25	16	/uploads/pets/16-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-26	17	/uploads/pets/17-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-27	18	/uploads/pets/18-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-28	19	/uploads/pets/19-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-29	20	/uploads/pets/20-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-30	20	/uploads/pets/20-2.jpg	2	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-31	21	/uploads/pets/21-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-32	22	/uploads/pets/22-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-33	23	/uploads/pets/23-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-34	24	/uploads/pets/24-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
-35	25	/uploads/pets/25-1.jpg	1	2026-11-19 02:15:32.768865+01	2026-11-19 02:15:32.768865+01
+1	1	/uploads/pets/1-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+2	1	/uploads/pets/1-2.jpg	2	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+3	2	/uploads/pets/2-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+4	2	/uploads/pets/2-2.jpg	2	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+5	2	/uploads/pets/2-3.jpg	3	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+6	3	/uploads/pets/3-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+7	3	/uploads/pets/3-2.jpg	2	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+8	4	/uploads/pets/4-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+9	5	/uploads/pets/5-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+10	5	/uploads/pets/5-2.jpg	2	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+11	6	/uploads/pets/6-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+12	7	/uploads/pets/7-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+13	7	/uploads/pets/7-2.jpg	2	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+14	7	/uploads/pets/7-3.jpg	3	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+15	8	/uploads/pets/8-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+16	9	/uploads/pets/9-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+17	10	/uploads/pets/10-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+18	11	/uploads/pets/11-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+19	12	/uploads/pets/12-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+20	12	/uploads/pets/12-2.jpg	2	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+21	13	/uploads/pets/13-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+22	14	/uploads/pets/14-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+23	14	/uploads/pets/14-2.jpg	2	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+24	15	/uploads/pets/15-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+25	16	/uploads/pets/16-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+26	17	/uploads/pets/17-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+27	18	/uploads/pets/18-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+28	19	/uploads/pets/19-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+29	20	/uploads/pets/20-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+30	20	/uploads/pets/20-2.jpg	2	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+31	21	/uploads/pets/21-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+32	22	/uploads/pets/22-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+33	23	/uploads/pets/23-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+34	24	/uploads/pets/24-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
+35	25	/uploads/pets/25-1.jpg	1	2026-11-22 23:55:54.435199+01	2026-11-22 23:55:54.435199+01
 \.
 
 
@@ -1418,18 +1496,18 @@ COPY public.pet_photo (id, id_pet, url, display_order, created_at, updated_at) F
 --
 
 COPY public.pet_rating_rel (id_adopter, id_pet, rating, created_at, updated_at) FROM stdin;
-1	7	FAVORITE	2026-11-09 02:15:32.768865+01	2026-11-09 02:15:32.768865+01
-1	6	DISCARDED	2026-11-14 02:15:32.768865+01	2026-11-14 02:15:32.768865+01
-1	9	DISCARDED	2026-10-10 02:15:32.768865+02	2026-10-10 02:15:32.768865+02
-2	16	FAVORITE	2026-11-11 02:15:32.768865+01	2026-11-11 02:15:32.768865+01
-2	13	FAVORITE	2026-11-16 02:15:32.768865+01	2026-11-16 02:15:32.768865+01
-2	10	DISCARDED	2026-11-17 02:15:32.768865+01	2026-11-17 02:15:32.768865+01
-3	3	FAVORITE	2026-11-07 02:15:32.768865+01	2026-11-07 02:15:32.768865+01
-3	4	FAVORITE	2026-11-07 02:15:32.768865+01	2026-11-07 02:15:32.768865+01
-4	3	FAVORITE	2026-11-10 02:15:32.768865+01	2026-11-10 02:15:32.768865+01
-4	9	FAVORITE	2026-11-15 02:15:32.768865+01	2026-11-15 02:15:32.768865+01
-7	14	FAVORITE	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01
-7	19	DISCARDED	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01
+1	7	FAVORITE	2026-11-12 23:55:54.435199+01	2026-11-12 23:55:54.435199+01
+1	6	DISCARDED	2026-11-17 23:55:54.435199+01	2026-11-17 23:55:54.435199+01
+1	9	DISCARDED	2026-10-13 23:55:54.435199+02	2026-10-13 23:55:54.435199+02
+2	16	FAVORITE	2026-11-14 23:55:54.435199+01	2026-11-14 23:55:54.435199+01
+2	13	FAVORITE	2026-11-19 23:55:54.435199+01	2026-11-19 23:55:54.435199+01
+2	10	DISCARDED	2026-11-20 23:55:54.435199+01	2026-11-20 23:55:54.435199+01
+3	3	FAVORITE	2026-11-10 23:55:54.435199+01	2026-11-10 23:55:54.435199+01
+3	4	FAVORITE	2026-11-10 23:55:54.435199+01	2026-11-10 23:55:54.435199+01
+4	3	FAVORITE	2026-11-13 23:55:54.435199+01	2026-11-13 23:55:54.435199+01
+4	9	FAVORITE	2026-11-18 23:55:54.435199+01	2026-11-18 23:55:54.435199+01
+7	14	FAVORITE	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01
+7	19	DISCARDED	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01
 \.
 
 
@@ -1572,13 +1650,21 @@ COPY public.province (id, name) FROM stdin;
 
 
 --
+-- Data for Name: session; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.session (id, id_user, token_hash, expires_at, created_at, updated_at) FROM stdin;
+\.
+
+
+--
 -- Data for Name: shelter; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.shelter (id, id_user, name, cif, description, phone, contact_email, address, postal_code, city, id_province, website, logo_url, opening_hours, verification_status, verified_at, rejection_reason, created_at, updated_at) FROM stdin;
-1	2	Protectora Huellas de Valencia	G46123456	Rescatamos perros y gatos abandonados en la comarca de L'Horta desde 2012.	961000001	info@huellasvalencia.test	Camí del Riu, 15	46019	Valencia	46	https://huellasvalencia.test	/uploads/shelters/1.png	Lunes a sábado, de 10:00 a 13:00 y de 17:00 a 19:00	VERIFIED	2026-07-24 02:15:32.768865+02	\N	2026-07-22 02:15:32.768865+02	2026-07-24 02:15:32.768865+02
-2	3	Asociación Bigotes Libres	G28123456	Asociación felina con colonias controladas y casas de acogida en Madrid.	911000002	hola@bigoteslibres.test	Calle del Gato, 7	28045	Madrid	28	\N	/uploads/shelters/2.png	Visitas con cita previa	VERIFIED	2026-06-24 02:15:32.768865+02	\N	2026-06-22 02:15:32.768865+02	2026-06-24 02:15:32.768865+02
-3	4	Refugio Patas Nuevas	G03123456	Refugio recién creado en la Vega Baja.	965000003	\N	Partida La Matanza, s/n	03300	Orihuela	3	\N	\N	\N	PENDING	\N	\N	2026-11-14 02:15:32.768865+01	2026-11-14 02:15:32.768865+01
+1	2	Protectora Huellas de Valencia	G46123456	Rescatamos perros y gatos abandonados en la comarca de L'Horta desde 2012.	961000001	info@huellasvalencia.test	Camí del Riu, 15	46019	Valencia	46	https://huellasvalencia.test	/uploads/shelters/1.png	Lunes a sábado, de 10:00 a 13:00 y de 17:00 a 19:00	VERIFIED	2026-07-27 23:55:54.435199+02	\N	2026-07-25 23:55:54.435199+02	2026-07-27 23:55:54.435199+02
+2	3	Asociación Bigotes Libres	G28123456	Asociación felina con colonias controladas y casas de acogida en Madrid.	911000002	hola@bigoteslibres.test	Calle del Gato, 7	28045	Madrid	28	\N	/uploads/shelters/2.png	Visitas con cita previa	VERIFIED	2026-06-27 23:55:54.435199+02	\N	2026-06-25 23:55:54.435199+02	2026-06-27 23:55:54.435199+02
+3	4	Refugio Patas Nuevas	G03123456	Refugio recién creado en la Vega Baja.	965000003	\N	Partida La Matanza, s/n	03300	Orihuela	3	\N	\N	\N	PENDING	\N	\N	2026-11-17 23:55:54.435199+01	2026-11-17 23:55:54.435199+01
 \.
 
 
@@ -1587,8 +1673,8 @@ COPY public.shelter (id, id_user, name, cif, description, phone, contact_email, 
 --
 
 COPY public.species (id, name, created_at, updated_at) FROM stdin;
-1	Perro	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
-2	Gato	2026-11-19 02:15:32.651419+01	2026-11-19 02:15:32.651419+01
+1	Perro	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
+2	Gato	2026-11-22 23:55:54.337977+01	2026-11-22 23:55:54.337977+01
 \.
 
 
@@ -1597,7 +1683,7 @@ COPY public.species (id, name, created_at, updated_at) FROM stdin;
 --
 
 COPY public.suspension (id, id_user, reason, details, ended_at, created_at, updated_at, created_by, updated_by) FROM stdin;
-1	10	INAPPROPRIATE_BEHAVIOR	Varias incidencias por mensajes ofensivos.	2026-10-05 02:15:32.768865+02	2026-09-20 02:15:32.768865+02	2026-10-05 02:15:32.768865+02	1	1
+1	10	INAPPROPRIATE_BEHAVIOR	Varias incidencias por mensajes ofensivos.	2026-10-08 23:55:54.435199+02	2026-09-23 23:55:54.435199+02	2026-10-08 23:55:54.435199+02	1	1
 \.
 
 
@@ -1606,27 +1692,27 @@ COPY public.suspension (id, id_user, reason, details, ended_at, created_at, upda
 --
 
 COPY public.visit (id, id_adopter, id_pet, id_visit_slot, status, responded_at, rejection_reason, cancelled_at, cancelled_by, void_reason, attendance_recorded_at, attendance_automatic, corrected_by_admin, corrected_at, id_replaced_visit, created_at, updated_at, created_by, updated_by) FROM stdin;
-1	1	1	1	COMPLETED	2026-10-17 02:15:32.768865+02	\N	\N	\N	\N	2026-10-22 02:15:32.768865+02	t	f	\N	\N	2026-10-16 02:15:32.768865+02	2026-10-22 02:15:32.768865+02	5	\N
-2	2	2	2	COMPLETED	2026-11-06 02:15:32.768865+01	\N	\N	\N	\N	2026-11-11 02:15:32.768865+01	t	f	\N	\N	2026-11-05 02:15:32.768865+01	2026-11-11 02:15:32.768865+01	6	\N
-3	3	2	3	COMPLETED	2026-11-06 02:15:32.768865+01	\N	\N	\N	\N	2026-11-12 02:15:32.768865+01	t	f	\N	\N	2026-11-06 02:15:32.768865+01	2026-11-12 02:15:32.768865+01	7	\N
-4	3	3	5	COMPLETED	2026-11-08 02:15:32.768865+01	\N	\N	\N	\N	2026-11-14 02:15:32.768865+01	t	f	\N	\N	2026-11-08 02:15:32.768865+01	2026-11-14 02:15:32.768865+01	7	\N
-5	4	3	6	COMPLETED	2026-11-11 02:15:32.768865+01	\N	\N	\N	\N	2026-11-17 02:15:32.768865+01	t	f	\N	\N	2026-11-11 02:15:32.768865+01	2026-11-17 02:15:32.768865+01	8	\N
-6	5	4	4	NO_SHOW	2026-11-09 02:15:32.768865+01	\N	\N	\N	\N	2026-11-13 13:00:00+01	f	f	\N	\N	2026-11-09 02:15:32.768865+01	2026-11-13 02:15:32.768865+01	9	2
-7	5	5	7	VOIDED	2026-11-12 02:15:32.768865+01	\N	\N	\N	NO_SHOW	\N	f	f	\N	\N	2026-11-12 02:15:32.768865+01	2026-11-13 02:15:32.768865+01	9	\N
-8	6	6	7	VOIDED	2026-11-13 02:15:32.768865+01	\N	\N	\N	ADOPTER_BLOCKED	\N	f	f	\N	\N	2026-11-13 02:15:32.768865+01	2026-11-13 02:15:32.768865+01	10	\N
-9	1	7	7	CONFIRMED	2026-11-15 02:15:32.768865+01	\N	\N	\N	\N	\N	f	f	\N	\N	2026-11-14 02:15:32.768865+01	2026-11-15 02:15:32.768865+01	5	2
-10	4	9	8	PENDING	\N	\N	\N	\N	\N	\N	f	f	\N	\N	2026-11-18 23:15:32.768865+01	2026-11-18 23:15:32.768865+01	8	\N
-11	2	10	9	EXPIRED	\N	\N	\N	\N	\N	\N	f	f	\N	\N	2026-11-17 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	6	\N
-12	3	7	8	REJECTED	2026-11-15 02:15:32.768865+01	Kira ya tiene una visita confirmada esa semana; te proponemos otro turno por el chat.	\N	\N	\N	\N	f	f	\N	\N	2026-11-15 02:15:32.768865+01	2026-11-15 02:15:32.768865+01	7	2
-13	4	6	8	CANCELLED	2026-11-16 02:15:32.768865+01	\N	2026-11-18 02:15:32.768865+01	ADOPTER	\N	\N	f	f	\N	\N	2026-11-15 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	8	8
-14	1	8	8	VOIDED	2026-11-16 02:15:32.768865+01	\N	\N	\N	MEDICAL_TREATMENT	\N	f	f	\N	\N	2026-11-15 02:15:32.768865+01	2026-11-17 02:15:32.768865+01	5	2
-15	7	13	11	COMPLETED	2026-10-07 02:15:32.768865+02	\N	\N	\N	\N	2026-10-12 02:15:32.768865+02	t	f	\N	\N	2026-10-06 02:15:32.768865+02	2026-10-12 02:15:32.768865+02	11	\N
-16	7	14	13	CONFIRMED	2026-11-14 02:15:32.768865+01	\N	\N	\N	\N	\N	f	f	\N	\N	2026-11-14 02:15:32.768865+01	2026-11-14 02:15:32.768865+01	11	3
-17	5	19	13	CANCELLED	2026-11-14 02:15:32.768865+01	\N	2026-11-18 02:15:32.768865+01	SHELTER	\N	\N	f	f	\N	\N	2026-11-13 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	9	3
-18	3	15	13	PENDING	\N	\N	\N	\N	\N	\N	f	f	\N	\N	2026-11-18 21:15:32.768865+01	2026-11-18 21:15:32.768865+01	7	\N
-19	2	16	14	VOIDED	2026-11-13 02:15:32.768865+01	\N	\N	\N	SLOT_CANCELLED	\N	f	f	\N	\N	2026-11-13 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	6	3
-20	2	16	15	CONFIRMED	2026-11-18 02:15:32.768865+01	\N	\N	\N	\N	\N	f	f	\N	19	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	6	\N
-21	4	20	12	COMPLETED	2026-11-12 02:15:32.768865+01	\N	\N	\N	\N	2026-11-16 14:00:00+01	f	t	2026-11-18 02:15:32.768865+01	\N	2026-11-12 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	8	1
+1	1	1	1	COMPLETED	2026-10-20 23:55:54.435199+02	\N	\N	\N	\N	2026-10-25 23:55:54.435199+01	t	f	\N	\N	2026-10-19 23:55:54.435199+02	2026-10-25 23:55:54.435199+01	5	\N
+2	2	2	2	COMPLETED	2026-11-09 23:55:54.435199+01	\N	\N	\N	\N	2026-11-14 23:55:54.435199+01	t	f	\N	\N	2026-11-08 23:55:54.435199+01	2026-11-14 23:55:54.435199+01	6	\N
+3	3	2	3	COMPLETED	2026-11-09 23:55:54.435199+01	\N	\N	\N	\N	2026-11-15 23:55:54.435199+01	t	f	\N	\N	2026-11-09 23:55:54.435199+01	2026-11-15 23:55:54.435199+01	7	\N
+4	3	3	5	COMPLETED	2026-11-11 23:55:54.435199+01	\N	\N	\N	\N	2026-11-17 23:55:54.435199+01	t	f	\N	\N	2026-11-11 23:55:54.435199+01	2026-11-17 23:55:54.435199+01	7	\N
+5	4	3	6	COMPLETED	2026-11-14 23:55:54.435199+01	\N	\N	\N	\N	2026-11-20 23:55:54.435199+01	t	f	\N	\N	2026-11-14 23:55:54.435199+01	2026-11-20 23:55:54.435199+01	8	\N
+6	5	4	4	NO_SHOW	2026-11-12 23:55:54.435199+01	\N	\N	\N	\N	2026-11-16 13:00:00+01	f	f	\N	\N	2026-11-12 23:55:54.435199+01	2026-11-16 23:55:54.435199+01	9	2
+7	5	5	7	VOIDED	2026-11-15 23:55:54.435199+01	\N	\N	\N	NO_SHOW	\N	f	f	\N	\N	2026-11-15 23:55:54.435199+01	2026-11-16 23:55:54.435199+01	9	\N
+8	6	6	7	VOIDED	2026-11-16 23:55:54.435199+01	\N	\N	\N	ADOPTER_BLOCKED	\N	f	f	\N	\N	2026-11-16 23:55:54.435199+01	2026-11-16 23:55:54.435199+01	10	\N
+9	1	7	7	CONFIRMED	2026-11-18 23:55:54.435199+01	\N	\N	\N	\N	\N	f	f	\N	\N	2026-11-17 23:55:54.435199+01	2026-11-18 23:55:54.435199+01	5	2
+10	4	9	8	PENDING	\N	\N	\N	\N	\N	\N	f	f	\N	\N	2026-11-22 20:55:54.435199+01	2026-11-22 20:55:54.435199+01	8	\N
+11	2	10	9	EXPIRED	\N	\N	\N	\N	\N	\N	f	f	\N	\N	2026-11-20 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	6	\N
+12	3	7	8	REJECTED	2026-11-18 23:55:54.435199+01	Kira ya tiene una visita confirmada esa semana; te proponemos otro turno por el chat.	\N	\N	\N	\N	f	f	\N	\N	2026-11-18 23:55:54.435199+01	2026-11-18 23:55:54.435199+01	7	2
+13	4	6	8	CANCELLED	2026-11-19 23:55:54.435199+01	\N	2026-11-21 23:55:54.435199+01	ADOPTER	\N	\N	f	f	\N	\N	2026-11-18 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	8	8
+14	1	8	8	VOIDED	2026-11-19 23:55:54.435199+01	\N	\N	\N	MEDICAL_TREATMENT	\N	f	f	\N	\N	2026-11-18 23:55:54.435199+01	2026-11-20 23:55:54.435199+01	5	2
+15	7	13	11	COMPLETED	2026-10-10 23:55:54.435199+02	\N	\N	\N	\N	2026-10-15 23:55:54.435199+02	t	f	\N	\N	2026-10-09 23:55:54.435199+02	2026-10-15 23:55:54.435199+02	11	\N
+16	7	14	13	CONFIRMED	2026-11-17 23:55:54.435199+01	\N	\N	\N	\N	\N	f	f	\N	\N	2026-11-17 23:55:54.435199+01	2026-11-17 23:55:54.435199+01	11	3
+17	5	19	13	CANCELLED	2026-11-17 23:55:54.435199+01	\N	2026-11-21 23:55:54.435199+01	SHELTER	\N	\N	f	f	\N	\N	2026-11-16 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	9	3
+18	3	15	13	PENDING	\N	\N	\N	\N	\N	\N	f	f	\N	\N	2026-11-22 18:55:54.435199+01	2026-11-22 18:55:54.435199+01	7	\N
+19	2	16	14	VOIDED	2026-11-16 23:55:54.435199+01	\N	\N	\N	SLOT_CANCELLED	\N	f	f	\N	\N	2026-11-16 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	6	3
+20	2	16	15	CONFIRMED	2026-11-21 23:55:54.435199+01	\N	\N	\N	\N	\N	f	f	\N	19	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	6	\N
+21	4	20	12	COMPLETED	2026-11-15 23:55:54.435199+01	\N	\N	\N	\N	2026-11-19 14:00:00+01	f	t	2026-11-21 23:55:54.435199+01	\N	2026-11-15 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	8	1
 \.
 
 
@@ -1635,22 +1721,22 @@ COPY public.visit (id, id_adopter, id_pet, id_visit_slot, status, responded_at, 
 --
 
 COPY public.visit_slot (id, id_shelter, slot_date, start_time, end_time, capacity, created_at, updated_at, created_by, updated_by) FROM stdin;
-1	1	2026-10-20	10:00:00	11:00:00	3	2026-10-15 02:15:32.768865+02	2026-10-15 02:15:32.768865+02	2	2
-2	1	2026-11-09	10:00:00	11:00:00	3	2026-11-04 02:15:32.768865+01	2026-11-04 02:15:32.768865+01	2	2
-3	1	2026-11-10	17:00:00	18:00:00	3	2026-11-04 02:15:32.768865+01	2026-11-04 02:15:32.768865+01	2	2
-4	1	2026-11-13	10:00:00	11:00:00	3	2026-11-07 02:15:32.768865+01	2026-11-07 02:15:32.768865+01	2	2
-5	1	2026-11-12	17:00:00	18:00:00	3	2026-11-07 02:15:32.768865+01	2026-11-07 02:15:32.768865+01	2	2
-6	1	2026-11-15	10:00:00	11:00:00	3	2026-11-07 02:15:32.768865+01	2026-11-07 02:15:32.768865+01	2	2
-7	1	2026-11-22	10:00:00	11:00:00	4	2026-11-11 02:15:32.768865+01	2026-11-11 02:15:32.768865+01	2	2
-8	1	2026-11-24	17:00:00	18:00:00	4	2026-11-11 02:15:32.768865+01	2026-11-11 02:15:32.768865+01	2	2
-9	1	2026-11-25	10:00:00	11:00:00	2	2026-11-11 02:15:32.768865+01	2026-11-11 02:15:32.768865+01	2	2
-10	1	2026-11-29	10:00:00	12:00:00	5	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	2	2
-11	2	2026-10-10	11:00:00	12:00:00	2	2026-10-05 02:15:32.768865+02	2026-10-05 02:15:32.768865+02	3	3
-12	2	2026-11-16	11:00:00	12:00:00	2	2026-11-09 02:15:32.768865+01	2026-11-09 02:15:32.768865+01	3	3
-13	2	2026-11-22	11:00:00	12:00:00	3	2026-11-12 02:15:32.768865+01	2026-11-12 02:15:32.768865+01	3	3
-14	2	2026-11-23	18:00:00	19:00:00	2	2026-11-12 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	3	3
-15	2	2026-11-24	11:00:00	12:00:00	3	2026-11-18 02:15:32.768865+01	2026-11-18 02:15:32.768865+01	3	3
-16	3	2026-11-26	10:00:00	11:00:00	2	2026-11-16 02:15:32.768865+01	2026-11-16 02:15:32.768865+01	4	4
+1	1	2026-10-23	10:00:00	11:00:00	3	2026-10-18 23:55:54.435199+02	2026-10-18 23:55:54.435199+02	2	2
+2	1	2026-11-12	10:00:00	11:00:00	3	2026-11-07 23:55:54.435199+01	2026-11-07 23:55:54.435199+01	2	2
+3	1	2026-11-13	17:00:00	18:00:00	3	2026-11-07 23:55:54.435199+01	2026-11-07 23:55:54.435199+01	2	2
+4	1	2026-11-16	10:00:00	11:00:00	3	2026-11-10 23:55:54.435199+01	2026-11-10 23:55:54.435199+01	2	2
+5	1	2026-11-15	17:00:00	18:00:00	3	2026-11-10 23:55:54.435199+01	2026-11-10 23:55:54.435199+01	2	2
+6	1	2026-11-18	10:00:00	11:00:00	3	2026-11-10 23:55:54.435199+01	2026-11-10 23:55:54.435199+01	2	2
+7	1	2026-11-25	10:00:00	11:00:00	4	2026-11-14 23:55:54.435199+01	2026-11-14 23:55:54.435199+01	2	2
+8	1	2026-11-27	17:00:00	18:00:00	4	2026-11-14 23:55:54.435199+01	2026-11-14 23:55:54.435199+01	2	2
+9	1	2026-11-28	10:00:00	11:00:00	2	2026-11-14 23:55:54.435199+01	2026-11-14 23:55:54.435199+01	2	2
+10	1	2026-12-02	10:00:00	12:00:00	5	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	2	2
+11	2	2026-10-13	11:00:00	12:00:00	2	2026-10-08 23:55:54.435199+02	2026-10-08 23:55:54.435199+02	3	3
+12	2	2026-11-19	11:00:00	12:00:00	2	2026-11-12 23:55:54.435199+01	2026-11-12 23:55:54.435199+01	3	3
+13	2	2026-11-25	11:00:00	12:00:00	3	2026-11-15 23:55:54.435199+01	2026-11-15 23:55:54.435199+01	3	3
+14	2	2026-11-26	18:00:00	19:00:00	2	2026-11-15 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	3	3
+15	2	2026-11-27	11:00:00	12:00:00	3	2026-11-21 23:55:54.435199+01	2026-11-21 23:55:54.435199+01	3	3
+16	3	2026-11-29	10:00:00	11:00:00	2	2026-11-19 23:55:54.435199+01	2026-11-19 23:55:54.435199+01	4	4
 \.
 
 
@@ -1694,6 +1780,13 @@ SELECT pg_catalog.setval('public.app_user_id_seq', 12, true);
 --
 
 SELECT pg_catalog.setval('public.audit_log_id_seq', 1, true);
+
+
+--
+-- Name: auth_token_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.auth_token_id_seq', 1, false);
 
 
 --
@@ -1743,6 +1836,13 @@ SELECT pg_catalog.setval('public.pet_id_seq', 25, true);
 --
 
 SELECT pg_catalog.setval('public.pet_photo_id_seq', 35, true);
+
+
+--
+-- Name: session_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.session_id_seq', 1, false);
 
 
 --
@@ -1842,6 +1942,14 @@ ALTER TABLE ONLY public.app_user
 
 ALTER TABLE ONLY public.audit_log
     ADD CONSTRAINT audit_log_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: auth_token auth_token_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auth_token
+    ADD CONSTRAINT auth_token_pkey PRIMARY KEY (id);
 
 
 --
@@ -1986,6 +2094,14 @@ ALTER TABLE ONLY public.province
 
 ALTER TABLE ONLY public.province
     ADD CONSTRAINT province_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: session session_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT session_pkey PRIMARY KEY (id);
 
 
 --
@@ -2134,6 +2250,13 @@ CREATE INDEX ix_audit_log_record ON public.audit_log USING btree (table_name, id
 
 
 --
+-- Name: ix_auth_token_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_auth_token_user ON public.auth_token USING btree (id_user, purpose);
+
+
+--
 -- Name: ix_conversation_shelter; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2201,6 +2324,13 @@ CREATE INDEX ix_pet_shelter ON public.pet USING btree (id_shelter);
 --
 
 CREATE INDEX ix_pet_status ON public.pet USING btree (status);
+
+
+--
+-- Name: ix_session_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_session_user ON public.session USING btree (id_user);
 
 
 --
@@ -2288,6 +2418,20 @@ CREATE UNIQUE INDEX uq_app_user_email ON public.app_user USING btree (lower((ema
 
 
 --
+-- Name: uq_auth_token_token_hash; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uq_auth_token_token_hash ON public.auth_token USING btree (token_hash);
+
+
+--
+-- Name: uq_session_token_hash; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uq_session_token_hash ON public.session USING btree (token_hash);
+
+
+--
 -- Name: uq_suspension_active; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2365,6 +2509,13 @@ CREATE TRIGGER trg_app_user_updated_at BEFORE UPDATE ON public.app_user FOR EACH
 
 
 --
+-- Name: auth_token trg_auth_token_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_auth_token_updated_at BEFORE UPDATE ON public.auth_token FOR EACH ROW EXECUTE FUNCTION public.fn_set_updated_at();
+
+
+--
 -- Name: breed trg_breed_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -2432,6 +2583,13 @@ CREATE TRIGGER trg_pet_rating_rel_updated_at BEFORE UPDATE ON public.pet_rating_
 --
 
 CREATE TRIGGER trg_pet_updated_at BEFORE UPDATE ON public.pet FOR EACH ROW EXECUTE FUNCTION public.fn_set_updated_at();
+
+
+--
+-- Name: session trg_session_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_session_updated_at BEFORE UPDATE ON public.session FOR EACH ROW EXECUTE FUNCTION public.fn_set_updated_at();
 
 
 --
@@ -2591,6 +2749,14 @@ ALTER TABLE ONLY public.adoption
 
 ALTER TABLE ONLY public.audit_log
     ADD CONSTRAINT audit_log_id_user_fkey FOREIGN KEY (id_user) REFERENCES public.app_user(id);
+
+
+--
+-- Name: auth_token auth_token_id_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auth_token
+    ADD CONSTRAINT auth_token_id_user_fkey FOREIGN KEY (id_user) REFERENCES public.app_user(id) ON DELETE CASCADE;
 
 
 --
@@ -2866,6 +3032,14 @@ ALTER TABLE ONLY public.preference_species_rel
 
 
 --
+-- Name: session session_id_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT session_id_user_fkey FOREIGN KEY (id_user) REFERENCES public.app_user(id) ON DELETE CASCADE;
+
+
+--
 -- Name: shelter shelter_id_province_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2981,5 +3155,5 @@ ALTER TABLE ONLY public.visit
 -- PostgreSQL database dump complete
 --
 
-\unrestrict LxjEzDhxYbEjg0ztmBXGoG3EJetCqtq4BaB1ueT1BFyS8pas0O8Ywt75kQSrM7d
+\unrestrict JXk7Ur98szUvX6V0SGQ1SqzK4HT1g3WPX42EsTmEnuNHb1rftSfJuPUc6JRkxx5
 

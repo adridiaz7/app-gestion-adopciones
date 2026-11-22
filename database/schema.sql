@@ -35,6 +35,9 @@ SET client_encoding = 'UTF8';
 -- Identidad
 CREATE TYPE user_role AS ENUM ('ADOPTER', 'SHELTER', 'ADMIN');
 
+-- Para qué sirve un enlace de un solo uso enviado por email
+CREATE TYPE auth_token_purpose AS ENUM ('EMAIL_VERIFICATION', 'PASSWORD_RESET');
+
 CREATE TYPE suspension_reason AS ENUM (
     'INAPPROPRIATE_BEHAVIOR', 'FALSE_INFORMATION', 'INAPPROPRIATE_CONTENT',
     'FRAUD', 'REPEATED_INCIDENTS', 'OTHER'
@@ -205,6 +208,36 @@ CREATE TABLE suspension (
     created_by  integer           REFERENCES app_user (id),
     updated_by  integer           REFERENCES app_user (id),
     CONSTRAINT chk_suspension_dates CHECK (ended_at IS NULL OR ended_at >= created_at)
+);
+
+-- Sesiones iniciadas (Usuario 1:N Sesión). Entidad débil: CASCADE.
+-- Se guarda el SHA-256 del token de la cookie, nunca el token: quien lea
+-- la tabla no puede suplantar a nadie.
+-- Sin CHECK de fechas: expires_at lo calcula el backend con su Reloj
+-- (falso en los tests) y created_at lo pone la BD con now().
+CREATE TABLE session (
+    id          integer     GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_user     integer     NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    token_hash  char(64)    NOT NULL,                -- SHA-256 en hexadecimal (único, sección 10)
+    expires_at  timestamptz NOT NULL,                -- 30 días deslizantes (RN-176)
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    updated_at  timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT chk_session_token_hash CHECK (token_hash ~ '^[0-9a-f]{64}$')
+);
+
+-- Enlaces de un solo uso enviados por email: verificar el email (RN-177)
+-- y restablecer la contraseña (RN-178). Una sola tabla para los dos, porque
+-- tienen la misma forma; purpose indica cuál es. Entidad débil: CASCADE.
+CREATE TABLE auth_token (
+    id          integer            GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_user     integer            NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    purpose     auth_token_purpose NOT NULL,
+    token_hash  char(64)           NOT NULL,          -- SHA-256 en hexadecimal (único, sección 10)
+    expires_at  timestamptz        NOT NULL,
+    used_at     timestamptz,                          -- NULL = sin usar; un solo uso (RN-178)
+    created_at  timestamptz        NOT NULL DEFAULT now(),
+    updated_at  timestamptz        NOT NULL DEFAULT now(),
+    CONSTRAINT chk_auth_token_token_hash CHECK (token_hash ~ '^[0-9a-f]{64}$')
 );
 
 
@@ -571,6 +604,11 @@ CREATE UNIQUE INDEX uq_suspension_active
     ON suspension (id_user)
     WHERE ended_at IS NULL;
 
+-- Cada token identifica una sola sesión o un solo enlace. El índice único
+-- también sirve para buscar por token_hash en cada petición.
+CREATE UNIQUE INDEX uq_session_token_hash    ON session (token_hash);
+CREATE UNIQUE INDEX uq_auth_token_token_hash ON auth_token (token_hash);
+
 -- Una sola visita activa por mascota y turno (RN-81).
 -- Las visitas canceladas, rechazadas, caducadas o anuladas no bloquean la plaza.
 CREATE UNIQUE INDEX uq_visit_active_slot_pet
@@ -604,6 +642,8 @@ CREATE INDEX ix_adopter_province   ON adopter (id_province);
 CREATE INDEX ix_shelter_province   ON shelter (id_province);
 CREATE INDEX ix_shelter_status     ON shelter (verification_status);
 CREATE INDEX ix_suspension_user    ON suspension (id_user);
+CREATE INDEX ix_session_user       ON session (id_user);        -- cerrar todas las sesiones
+CREATE INDEX ix_auth_token_user    ON auth_token (id_user, purpose);
 
 -- Mascotas: la galería y el modo descubrir filtran siempre por estado
 CREATE INDEX ix_pet_shelter        ON pet (id_shelter);
@@ -735,8 +775,8 @@ END;
 $$;
 
 -- Tablas auditadas: las que reflejan decisiones del proceso o de moderación.
--- No se auditan mensajes ni notificaciones (mucho volumen y poco valor)
--- ni las tablas puente.
+-- No se auditan mensajes ni notificaciones (mucho volumen y poco valor),
+-- ni las tablas puente, ni session ni auth_token (datos técnicos de acceso).
 DO $$
 DECLARE
     t text;

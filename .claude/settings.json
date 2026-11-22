@@ -27,7 +27,15 @@
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "npm test --silent 1>&2 || exit 2" }
+          { "type": "command", "command": "npm test --silent 1>&2 || exit 2" },
+          { "type": "command", "command": "bash scripts/check-auth.sh" }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "bash scripts/check-auth.sh" }
         ]
       }
     ]

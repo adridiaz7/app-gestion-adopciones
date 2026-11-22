@@ -30,6 +30,9 @@ La Plataforma de Adopción de Mascotas es un sistema que conecta **protectoras**
 - **Node.js + Express 5**: Servidor HTTP y API REST
 - **TypeScript**: Implementación del servidor y lógica de negocio
 - **pg (node-postgres)**: Acceso a la base de datos con SQL escrito a mano y consultas parametrizadas (sin ORM)
+- **Zod**: validación del formato de los datos de entrada
+- **@node-rs/argon2**: hash de contraseñas con Argon2id
+- **express-rate-limit**: límite de intentos de inicio de sesión
 
 ### Base de Datos
 - **PostgreSQL** (versión 11 o superior; desarrollado y probado en la 18): Sistema de gestión de datos relacional
@@ -113,9 +116,63 @@ Todas las respuestas de error tienen la misma forma:
 - Cualquier otro error (un fallo de SQL, un error de programación) se responde con **500**, código `ERROR_INTERNO` y un mensaje genérico. El detalle interno nunca se envía al cliente: se registra en la consola del servidor.
 - Una ruta de `/api` que no existe responde **404** con código `RUTA_NO_ENCONTRADA` (no es el `NoEncontrado` de negocio: aquí no existe la URL, allí no existe el recurso).
 
-### Pendiente de decidir
+### Validación de la entrada
 
-- Validación del formato de los datos de entrada (manual o con librería). Se decidirá al implementar el registro, el primer endpoint que recibe datos; la opción preferida es Zod. Las reglas de negocio (mayoría de edad, email repetido…) no forman parte de esta decisión: siempre se comprueban en el dominio o en el modelo.
+- El **formato** de los datos de entrada (tipos, campos obligatorios, longitudes) se valida con **Zod** en el controlador. Un fallo responde 400 con código `DATOS_NO_VALIDOS`.
+- Las **reglas de negocio** (mayoría de edad, email repetido…) no son formato: siempre se comprueban en el dominio o en el modelo.
+
+---
+
+## Autenticación
+
+Las reglas detalladas y los tests obligatorios están en el agente [`.claude/agents/autenticador.md`](../.claude/agents/autenticador.md); aquí va el resumen de las decisiones.
+
+### Sesiones en servidor, no JWT
+
+- Al iniciar sesión se crea una fila en `session` y el navegador recibe un **token aleatorio** (`crypto.randomBytes(32)`) en una cookie.
+- En la BD se guarda el **SHA-256 del token**, nunca el token: quien lea la tabla no puede suplantar a nadie.
+- Se descartó JWT porque un JWT no se puede revocar antes de que caduque. Con sesiones en servidor, cerrar sesión o cambiar la contraseña invalida el acceso al momento: basta con borrar la fila.
+- La sesión dura 30 días deslizantes ([RN-176](reglas-de-negocio.md)). Cada inicio de sesión crea una sesión nueva e invalida la anterior.
+- Las caducidades se calculan con el Reloj inyectado.
+
+### Cookie
+
+- `HttpOnly` (el JavaScript de la página no puede leerla, así que un XSS no la roba), `SameSite=Lax`, `Path=/` y `Secure` en producción. Caducidad con `expires`.
+- El token nunca viaja en el cuerpo de una respuesta, en la URL ni en `localStorage`.
+
+### Contraseñas
+
+- Hash con **Argon2id** (`@node-rs/argon2`, m=19456, t=2, p=1, los parámetros que recomienda OWASP) ([RN-08](reglas-de-negocio.md)).
+- Longitud de 12 a 256 caracteres, sin reglas de composición ([RN-175](reglas-de-negocio.md)).
+
+### Enlaces por email
+
+- Los enlaces de verificación de email (24 h, [RN-177](reglas-de-negocio.md)) y de restablecimiento de contraseña (30 min y un solo uso, [RN-178](reglas-de-negocio.md)) se guardan en `auth_token`, también como SHA-256.
+- El envío pasa por la interfaz `EnviadorEmail`. Mientras no se decida el envío real, la implementación escribe el enlace en la consola.
+
+### Protecciones
+
+- **Límite de intentos:** 10 inicios de sesión cada 15 minutos por IP ([RN-179](reglas-de-negocio.md)), con `express-rate-limit` en memoria. Responde 429 con código `DEMASIADOS_INTENTOS`.
+- **Mismo mensaje** si el email no existe o la contraseña falla, para no revelar qué emails están registrados.
+- **Origin:** las peticiones que modifican datos con un `Origin` ajeno se rechazan (defensa contra CSRF, junto con `SameSite`).
+- **Rutas públicas:** todo `/api` exige sesión salvo las listadas en `RUTAS_PUBLICAS`.
+
+### Endpoints
+
+| Método | Ruta | Uso |
+|---|---|---|
+| POST | `/api/registro/adoptante` | Crear cuenta y perfil de adoptante (CU-01) |
+| POST | `/api/registro/protectora` | Crear cuenta y perfil de protectora (CU-02) |
+| POST | `/api/verificar-email` | Verificar el email |
+| POST · GET · DELETE | `/api/sesion` | Iniciar sesión · usuario actual · cerrar sesión |
+| DELETE | `/api/sesiones` | Cerrar todas las sesiones |
+| PUT | `/api/contrasena` | Cambiar la contraseña |
+| POST | `/api/recuperar-contrasena` | Pedir el enlace de restablecimiento |
+| POST | `/api/restablecer-contrasena` | Fijar la contraseña nueva con el enlace |
+
+La sesión se trata como un recurso REST: se crea al entrar, se consulta para saber quién eres y se borra al salir.
+
+El registro crea la cuenta y el perfil en **una sola transacción** ([RN-171](reglas-de-negocio.md)), para que nunca quede una cuenta sin perfil. Por eso hay un endpoint por rol: cada uno recibe datos distintos.
 
 ---
 
@@ -140,13 +197,21 @@ Así cada test empieza con la base de datos en un estado conocido y no depende d
 
 ### Esquema Relacional
 
-Convenciones: nombres en inglés, claves foráneas con el prefijo `id_`, tablas N:M con el sufijo `_rel`, fechas en `timestamptz` y columnas de auditoría (`created_at`, `updated_at` y, en las tablas de negocio, `created_by` y `updated_by`). El esquema completo está en [`database/schema.sql`](../database/schema.sql) (28 tablas y 23 tipos ENUM).
+Convenciones: nombres en inglés, claves foráneas con el prefijo `id_`, tablas N:M con el sufijo `_rel`, fechas en `timestamptz` y columnas de auditoría (`created_at`, `updated_at` y, en las tablas de negocio, `created_by` y `updated_by`). El esquema completo está en [`database/schema.sql`](../database/schema.sql) (30 tablas y 24 tipos ENUM).
 
 #### Tablas Principales
 
 **`app_user`**
 - Cuenta de acceso común a los tres roles (adoptante, protectora y administrador)
 - Campos: id, email, contraseña (hash), rol, email verificado, fecha de eliminación (cuenta anonimizada)
+
+**`session`**
+- Sesiones iniciadas de cada usuario (entidad débil de `app_user`)
+- Campos: id, id_user, hash del token, caducidad
+
+**`auth_token`**
+- Enlaces de un solo uso enviados por email: verificar el email y restablecer la contraseña
+- Campos: id, id_user, uso, hash del token, caducidad, fecha de uso
 
 **`adopter`**
 - Perfil del adoptante (relación 1:1 con `app_user`)
