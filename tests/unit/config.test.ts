@@ -25,6 +25,19 @@ describe('cargarConfiguracion', () => {
     expect(() => cargarConfiguracion({ ...entornoValido, PORT: '70000' })).toThrow('PORT');
   });
 
+  it('sin PUBLIC_URL, la URL pública es http://localhost:<PORT>', () => {
+    expect(cargarConfiguracion(entornoValido).urlPublica).toBe('http://localhost:4000');
+  });
+
+  it('lee la URL pública de PUBLIC_URL, sin la barra final', () => {
+    const configuracion = cargarConfiguracion({
+      ...entornoValido,
+      PUBLIC_URL: 'https://adopciones.example/',
+    });
+
+    expect(configuracion.urlPublica).toBe('https://adopciones.example');
+  });
+
   it('lee la conexión a la base de datos, con el puerto como número', () => {
     expect(cargarConfiguracion(entornoValido).bd).toEqual({
       host: 'localhost',

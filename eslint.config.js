@@ -5,7 +5,8 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  { ignores: ['dist/', 'node_modules/', 'docs/', 'database/'] },
+  // public/js/ es JavaScript generado por tsc a partir de src/client: se revisa el original
+  { ignores: ['dist/', 'node_modules/', 'docs/', 'database/', 'public/js/'] },
   eslint.configs.recommended,
   tseslint.configs.strict,
   {
@@ -14,5 +15,10 @@ export default defineConfig(
       // CLAUDE.md: prohibido `any`
       '@typescript-eslint/no-explicit-any': 'error',
     },
+  },
+  {
+    // El cliente se ejecuta en el navegador: document, window, fetch…
+    files: ['src/client/**/*.ts'],
+    languageOptions: { globals: globals.browser },
   },
 );

@@ -6,6 +6,8 @@
 # Dependencias y compilaciones
 node_modules/
 dist/
+# JavaScript del navegador generado desde src/client (npm run build:client)
+public/js/
 build/
 target/
 __pycache__/

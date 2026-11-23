@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear cuenta · Elige el tipo de cuenta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <!-- Generado desde src/client/pages/tipo-de-cuenta.ts (npm run build:client) -->
+  <script type="module" src="/js/client/pages/tipo-de-cuenta.js"></script>
+</head>
+<body>
+  <!-- Pantalla 02 · docs/ux-ui/acceso/02-tipo-de-cuenta.png -->
+  <header class="cabecera">
+    <span class="marca">
+      <span class="marca-logo" aria-hidden="true">
+        <svg class="icono" viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="9" r="2"/><circle cx="10" cy="5.5" r="2"/><circle cx="14" cy="5.5" r="2"/><circle cx="18" cy="9" r="2"/><path d="M12 11c-3 0-6 4-6 6.5 0 1.5 1.2 2.5 2.7 2.5 1.2 0 2.1-.6 3.3-.6s2.1.6 3.3.6c1.5 0 2.7-1 2.7-2.5C18 15 15 11 12 11z"/></svg>
+      </span>
+      <span>
+        <span class="marca-nombre">Nombre de la app</span><br>
+        <span class="marca-eslogan">Eslogan breve</span>
+      </span>
+    </span>
+    <span class="enlace-cabecera enlace-deshabilitado" aria-disabled="true">
+      <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      Volver a la web
+      <span class="etiqueta-proximamente">Próximamente</span>
+    </span>
+  </header>
+
+  <main class="contenido">
+    <section class="tarjeta" aria-labelledby="titulo">
+      <p class="overline">Crear cuenta</p>
+      <h1 class="titulo" id="titulo">¿Cómo vas a usar la plataforma?</h1>
+      <p class="subtitulo">Elige el tipo de cuenta.</p>
+
+      <form id="formulario-tipo" class="pila">
+        <fieldset class="opciones">
+          <legend class="visualmente-oculto">Tipo de cuenta</legend>
+
+          <label class="opcion">
+            <span class="opcion-icono" aria-hidden="true">
+              <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+            </span>
+            <span class="opcion-texto">
+              <span class="opcion-titulo">Quiero adoptar</span>
+              <span class="opcion-descripcion">Busca mascotas compatibles, visítalas y solicita su adopción.</span>
+            </span>
+            <input type="radio" name="tipo" value="adoptante" checked>
+          </label>
+
+          <!-- CU-02 · Registro de protectora: llegará en otra funcionalidad -->
+          <label class="opcion">
+            <span class="opcion-icono" aria-hidden="true">
+              <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>
+            </span>
+            <span class="opcion-texto">
+              <span class="opcion-titulo">Soy una protectora <span class="etiqueta-proximamente">Próximamente</span></span>
+              <span class="opcion-descripcion">Publica tus mascotas y gestiona visitas y adopciones.</span>
+            </span>
+            <input type="radio" name="tipo" value="protectora" disabled>
+          </label>
+        </fieldset>
+
+        <button type="submit" class="boton boton-principal">Continuar →</button>
+      </form>
+
+      <p class="pie-tarjeta">
+        ¿Ya tienes cuenta?
+        <span class="enlace-deshabilitado" aria-disabled="true">Iniciar sesión</span>
+        <span class="etiqueta-proximamente">Próximamente</span>
+      </p>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <span>© 2026 Nombre de la app</span>
+    <span>Privacidad · Términos · Ayuda</span>
+  </footer>
+</body>
+</html>
