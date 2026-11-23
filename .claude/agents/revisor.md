@@ -11,6 +11,7 @@ Revisa:
 - Que cada regla del dominio tiene al menos un test.
 - Que los tests prueban comportamiento, no detalles internos.
 - Casos límite sin cubrir.
+- Que no se repite ningún fallo de `docs/registro-harness.md`.
 
 Devuelve una lista corta: problema, archivo, por qué importa.
 Marca qué problemas se repetirán y deberían ser una regla del harness.

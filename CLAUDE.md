@@ -28,6 +28,8 @@ Entorno: Windows, con PowerShell y Git Bash.
   - URLs: las de negocio en español, sin tildes ni eñes (`/api/mascotas`, `/api/recuperar-contrasena`); las técnicas en inglés (`/api/health`). Criterio: si el concepto aparece en los casos de uso, va en español.
 - **JSON de la API en `camelCase` y en español** (`{ "fechaNacimiento": … }`). El modelo traduce las filas desde los nombres de la BD; los tipos viven en `src/shared/`.
 - **Citar las reglas en el código:** en SQL con `-- RN-08` y en TS con `// RN-08` (en los tests, ver la sección Tests).
+- **Fechas:** se comparan como números (año, mes, día), no como texto. Como texto solo si el formato está garantizado (por ejemplo, tras `z.iso.date()`).
+- **Ids de entrada:** llevan un `max` según el tipo de su columna (`smallint` 32767, `integer` 2147483647). Si no, un número grande llega a PostgreSQL y da 500.
 
 ## Tests
 
@@ -60,13 +62,22 @@ No las resuelvas por tu cuenta: consulta antes. Cuando se decida una, pasa a `do
 - **Envío de emails** (CU-03 verificar email, CU-05 recuperar contraseña). Mientras tanto, la interfaz `EnviadorEmail` escribe el enlace en la consola.
 - **Subida y almacenamiento de imágenes** (fotos de mascotas, logos, avatares, imagen del chat).
 - **Tareas programadas** (CU-45…48).
-- **Zona horaria de los turnos.**
+- **Zona horaria de los turnos.** CU-01 ya calcula "hoy" en `Europe/Madrid` para la mayoría de edad.
+
+Surgidas en la revisión de CU-01:
+
+- **Fallo de un efecto externo tras el COMMIT** (el email del registro): ¿se responde 201 y se registra el fallo, en vez de 500?
+- **Normalizar la contraseña (NFC) antes del hash**, para que una "ñ" escrita en otro sistema operativo dé el mismo hash. Decidir antes de CU-04.
+- **Limpieza de la BD en los tests:** hoy es DELETE de todo menos el ADMIN, y fallará en CU-04 por la FK de `audit_log`. ¿Pasar a `TRUNCATE … CASCADE` y volver a cargar el admin?
+- **`PUBLIC_URL`:** ¿validarla con `new URL()` y dejar el valor por defecto en un solo sitio (hoy está también en `app.ts`)?
+- **Documentación de CU-01:** llevar a `TECH_SPEC.md` el token en el fragmento (`#token=`), `z.strictObject` y la configuración del cliente (`tsconfig.client.json`, `dev:client`, `build:client`), y actualizar este archivo (Comandos y Estructura).
 
 ## Documentación de referencia
 
 - `docs/reglas-de-negocio.md`: reglas numeradas `RN-01…RN-179`. **Los identificadores están congelados**: una regla nueva recibe el siguiente número libre aunque se coloque en otra sección, y una regla eliminada no libera su número.
 - `docs/casos-de-uso.md`: casos de uso `CU-01…CU-48`. Están completos y guían el desarrollo de cada funcionalidad.
 - `docs/TECH_SPEC.md`: stack, herramientas, arquitectura, convenciones de la API, autenticación y resumen del esquema.
+- `docs/registro-harness.md`: fallos del agente que se pueden repetir y el cambio del harness que los evita. Cuando un fallo así aparezca, se añade una fila.
 - `.claude/agents/autenticador.md`: reglas no negociables de auth, endpoints y tests obligatorios. Lo vigila `scripts/check-auth.sh` (hooks `Stop` y `SubagentStop`).
 - `database/README.md`: puesta en marcha, seeds, dump, usuarios de desarrollo y **glosario español ↔ inglés** de tablas, estados y enums.
 - `docs/ux-ui/`: diseños de referencia en PNG (`acceso/`, `app-adoptante/`, `landing.png`) y `design-system.md`.
