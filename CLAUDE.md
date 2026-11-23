@@ -2,7 +2,7 @@
 
 Plataforma web de adopción de mascotas que maneja solicitudes, visitas y adopciones.
 
-Estado actual: **primera funcionalidad lista**. Hay reglas de negocio, casos de uso, base de datos PostgreSQL, mockups y especificación técnica. El backend tiene `GET /api/health`, el catálogo `GET /api/provincias`, el middleware de errores (solo 500 por ahora), el pool de `pg` y la BD de tests (`adopciones_test`, recreada en cada `npm test`). Todavía no hay autenticación ni frontend.
+Estado actual: **registro de adoptante (CU-01) listo, con sus pantallas**. Hay reglas de negocio, casos de uso, base de datos PostgreSQL, mockups y especificación técnica. El backend tiene `GET /api/health`, el catálogo `GET /api/provincias`, `POST /api/registro/adoptante`, el middleware de errores por categorías y la BD de tests (`adopciones_test`, recreada en cada `npm test`). El frontend tiene las pantallas de tipo de cuenta y registro de adoptante. Todavía no hay login ni sesiones.
 
 ## Comandos
 
@@ -12,8 +12,8 @@ Entorno: Windows, con PowerShell y Git Bash.
 - Tests: npm test (todos) · npm run test:unit (solo unitarios) · npm run test:auth (solo auth) · npm run test:watch
 - Comprobar tipos: npm run typecheck
 - Lint: npm run lint
-- Desarrollo: npm run dev (tsx watch; necesita un `.env`, copia de `.env.example`)
-- Compilar / producción: npm run build · npm start
+- Desarrollo: npm run dev (compila el cliente una vez y arranca el servidor con tsx watch; necesita un `.env`, copia de `.env.example`) · npm run dev:client (recompila el cliente al guardar; en otra terminal)
+- Compilar / producción: npm run build (servidor y cliente) · npm run build:client (solo cliente) · npm start
 
 ## Convenciones
 
@@ -70,7 +70,7 @@ Surgidas en la revisión de CU-01:
 - **Normalizar la contraseña (NFC) antes del hash**, para que una "ñ" escrita en otro sistema operativo dé el mismo hash. Decidir antes de CU-04.
 - **Limpieza de la BD en los tests:** hoy es DELETE de todo menos el ADMIN, y fallará en CU-04 por la FK de `audit_log`. ¿Pasar a `TRUNCATE … CASCADE` y volver a cargar el admin?
 - **`PUBLIC_URL`:** ¿validarla con `new URL()` y dejar el valor por defecto en un solo sitio (hoy está también en `app.ts`)?
-- **Documentación de CU-01:** llevar a `TECH_SPEC.md` el token en el fragmento (`#token=`), `z.strictObject` y la configuración del cliente (`tsconfig.client.json`, `dev:client`, `build:client`), y actualizar este archivo (Comandos y Estructura).
+- **Documentación de CU-01:** llevar a `TECH_SPEC.md` el token en el fragmento (`#token=`) y `z.strictObject`.
 
 ## Documentación de referencia
 
@@ -83,46 +83,18 @@ Surgidas en la revisión de CU-01:
 - `docs/ux-ui/`: diseños de referencia en PNG (`acceso/`, `app-adoptante/`, `landing.png`) y `design-system.md`.
 - `docs/mockups/prototipo-paleta-1.html`: prototipo navegable del adoptante. Es HTML autocontenido: los tokens de color están en `:root` y las pantallas se pintan con un `render()` de JS vanilla.
 
-## Estructura de carpetas (acordada)
+## Dónde va cada cosa
 
-Se organiza **por capa**, sin agrupar por funcionalidad. Las carpetas se crean cuando hace falta el primer archivo de cada una.
+El árbol completo de carpetas y los `tsconfig` están en `docs/TECH_SPEC.md` (Arquitectura). Aquí van las reglas que no se ven en los archivos:
 
-```
-├── database/              schema.sql, seeds y dump
-├── docs/                  Reglas, casos de uso, spec y UX
-├── src/
-│   ├── server/            Backend (Express + pg)
-│   │   ├── app.ts         Crea y configura Express, sin listen (los tests la importan)
-│   │   ├── server.ts      Arranca el servidor (listen)
-│   │   ├── auth/          Utilidades de auth: hash de contraseñas, tokens y cookie
-│   │   ├── config/        Único sitio que lee process.env; valida y tipa la configuración
-│   │   ├── db/            Pool de pg y helper de transacción (hace SET LOCAL app.current_user_id)
-│   │   ├── domain/        Reglas puras: errores propios e interfaz Reloj. Sin SQL ni Express
-│   │   ├── models/        SQL por entidad (M)
-│   │   ├── controllers/   Validan, llaman al modelo y responden JSON (C)
-│   │   ├── routes/        URL + verbo HTTP → controlador
-│   │   └── middlewares/   Errores de negocio → HTTP, validación y autenticación
-│   ├── client/            TS del navegador (V)
-│   │   ├── api/           Funciones con fetch hacia la API
-│   │   └── pages/         Lógica de cada pantalla
-│   └── shared/            Tipos de los JSON de la API, comunes a cliente y servidor
-├── public/                HTML, CSS e imágenes, servidos con express.static
-├── tests/
-│   ├── unit/              Dominio, sin BD y con un Reloj falso
-│   ├── integration/       API y SQL contra una BD temporal
-│   └── helpers/           Reloj falso, BD temporal y datos de prueba
-└── dist/                  Salida compilada (no se versiona)
-```
-
-- **Un solo `package.json`** en la raíz. Configuraciones de TypeScript:
-  - `tsconfig.base.json`: opciones estrictas comunes.
-  - `tsconfig.json`: servidor + `shared` + tests, sin generar archivos. Lo usan VS Code y `npm run typecheck`.
-  - `tsconfig.server.json`: compila `src/server` y `src/shared` a `dist/` (`npm run build`).
-  - `tsconfig.client.json` (**pendiente**: se crea con el primer archivo de `src/client`): incluye `src/client` y `src/shared`, con `lib: ["DOM"]`. Así el cliente no puede importar código del servidor.
-- **Variables de entorno:**
-  - `.env` es la configuración de desarrollo y `.env.test` la de los tests, que apunta a la BD temporal. Ninguno de los dos se versiona.
-  - `.env.example` es la plantilla versionada, con valores ficticios.
-  - Se cargan con la opción nativa `node --env-file=...`, sin `dotenv`.
+- Se organiza **por capa** (`models/`, `controllers/`, `routes/`…), nunca por funcionalidad. Una carpeta se crea cuando hace falta su primer archivo.
+- `src/server/domain/`: reglas puras. Sin SQL, sin Express y sin leer la hora (la da el Reloj).
+- `src/server/models/`: todo el SQL, y la traducción entre los nombres de la BD y los del código.
+- `src/server/controllers/`: validan la entrada (Zod), llaman al dominio y al modelo, y responden. Sin SQL.
+- `src/server/config/`: el **único** sitio que lee `process.env`. Las variables se cargan con `node --env-file`, sin `dotenv`; `.env` y `.env.test` no se versionan (la plantilla es `.env.example`).
+- `src/client/` (navegador) tiene su propio `tsconfig.client.json`: **no puede importar** nada de `src/server/`. Lo que comparten cliente y servidor (tipos del JSON) va en `src/shared/`.
+- `public/js/` lo genera `tsc` desde `src/client/`: no se edita a mano ni se versiona.
+- Tests: `tests/unit/` sin BD ni Express; `tests/integration/` con supertest y `adopciones_test`; dobles y helpers en `tests/helpers/`.
 
 ## Base de datos
 

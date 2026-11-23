@@ -65,6 +65,50 @@ Vista (navegador) ──fetch──▶ Ruta Express ──▶ Controlador ──
 
 Esta arquitectura separa responsabilidades y facilita el mantenimiento y la escalabilidad de la aplicación. Además, frontend y backend pueden desarrollarse y probarse por separado.
 
+### Estructura de carpetas
+
+Se organiza **por capa**, sin agrupar por funcionalidad. Las carpetas se crean cuando hace falta el primer archivo de cada una. Las reglas de cada carpeta están resumidas en `CLAUDE.md` ("Dónde va cada cosa").
+
+```
+├── database/              schema.sql, seeds y dump
+├── docs/                  Reglas, casos de uso, spec, UX y registro del harness
+├── scripts/               check-auth.sh (guardián de las reglas de auth)
+├── src/
+│   ├── server/            Backend (Express + pg)
+│   │   ├── app.ts         Crea y configura Express, sin listen (los tests la importan)
+│   │   ├── server.ts      Arranca el servidor (listen)
+│   │   ├── auth/          Hash de contraseñas, tokens, envío de emails (y la cookie, en CU-04)
+│   │   ├── config/        Único sitio que lee process.env; valida y tipa la configuración
+│   │   ├── db/            Pool de pg y helper de transacción (fijará app.current_user_id en CU-04)
+│   │   ├── domain/        Reglas puras: errores propios, interfaz Reloj, mayoría de edad…
+│   │   ├── models/        SQL por entidad (M)
+│   │   ├── controllers/   Validan, llaman al dominio y al modelo, y responden JSON (C)
+│   │   ├── routes/        URL + verbo HTTP → controlador
+│   │   └── middlewares/   Errores de negocio → HTTP (y autenticación, en CU-04)
+│   ├── client/            TS del navegador (V)
+│   │   ├── api/           Funciones con fetch hacia la API
+│   │   └── pages/         Lógica de cada pantalla
+│   └── shared/            Tipos de los JSON de la API, comunes a cliente y servidor
+├── public/                HTML y CSS, servidos con express.static
+│   └── js/                Generado por tsc desde src/client (no se versiona)
+├── tests/
+│   ├── unit/              Código puro, sin BD ni Express
+│   ├── integration/       API y SQL contra adopciones_test
+│   └── helpers/           Reloj falso, BD de tests y su globalSetup
+└── dist/                  Servidor compilado (no se versiona)
+```
+
+**Configuraciones de TypeScript** (un solo `package.json`, en la raíz):
+
+| Archivo | Incluye | Para qué |
+|---|---|---|
+| `tsconfig.base.json` | — | Opciones estrictas comunes |
+| `tsconfig.json` | servidor, `shared` y tests | VS Code y `npm run typecheck` (sin generar archivos) |
+| `tsconfig.server.json` | servidor y `shared` | Compila a `dist/` (`npm run build`) |
+| `tsconfig.client.json` | cliente y `shared`, con `lib: DOM` | Compila a `public/js/` (`npm run build:client`). Al no incluir `src/server`, el cliente no puede importar código del servidor |
+
+**Variables de entorno:** `.env` (desarrollo) y `.env.test` (tests, apunta a `adopciones_test`) no se versionan; `.env.example` es la plantilla, con valores ficticios. Se cargan con la opción nativa `node --env-file`, sin `dotenv`.
+
 ---
 
 ## API REST
