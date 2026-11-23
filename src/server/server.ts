@@ -6,7 +6,7 @@ import { crearPool } from './db/pool.js';
 
 const configuracion = cargarConfiguracion(process.env);
 const pool = crearPool(configuracion.bd);
-const app = crearApp(pool);
+const app = crearApp(pool, { urlPublica: configuracion.urlPublica });
 
 app.listen(configuracion.puerto, () => {
   console.log(`Servidor escuchando en http://localhost:${configuracion.puerto}`);

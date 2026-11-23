@@ -188,6 +188,7 @@ Los tests nunca usan la base de datos de desarrollo: usan `adopciones_test`, con
 1. **Al empezar `npm test`**, una sola vez (`globalSetup` de Vitest): se borra y se vuelve a crear `adopciones_test`, y se cargan `schema.sql` y `seed.sql` (los catálogos).
 2. **Antes de cada test**: `TRUNCATE` de las tablas que rellenan los tests. Los catálogos se conservan.
 3. Los tests de integración se ejecutan **en serie**, porque comparten la misma base de datos.
+4. **Dos `npm test` a la vez** (un hook, otra sesión, una terminal) también se pisarían: el `globalSetup` coge un *advisory lock* de PostgreSQL y lo mantiene hasta el final, así que la segunda ejecución espera a que termine la primera.
 
 Así cada test empieza con la base de datos en un estado conocido y no depende del orden ni de lo que dejaron los demás. Se descartó envolver cada test en una transacción con `ROLLBACK`: es más rápido, pero obliga a pasar la misma conexión a todo el código y a usar `SAVEPOINT` cuando el código abre su propia transacción. Con el tamaño de este proyecto, la diferencia de velocidad no compensa esa complejidad.
 

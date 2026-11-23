@@ -1,0 +1,18 @@
+{
+  // TypeScript del navegador (src/client) + tipos compartidos (src/shared).
+  // Compila a public/js/, que Express sirve como archivos estáticos.
+  // Al no incluir src/server, el cliente no puede importar código del servidor.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    // El navegador carga módulos ES nativos (<script type="module">), sin
+    // empaquetador: los imports relativos llevan .js, igual que en el servidor.
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    // DOM: document, fetch, HTMLElement… Sin "node": aquí no existe process ni fs.
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": [],
+    "rootDir": "src",
+    "outDir": "public/js"
+  },
+  "include": ["src/client", "src/shared"]
+}
